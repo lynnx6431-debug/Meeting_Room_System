@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: meeting-room-postgres
+    environment:
+      POSTGRES_USER: meeting
+      POSTGRES_PASSWORD: meeting123
+      POSTGRES_DB: meeting_room
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meeting -d meeting_room"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    container_name: meeting-room-backend
+    environment:
+      DATABASE_URL: postgresql://meeting:meeting123@postgres:5432/meeting_room?schema=public
+      PORT: 3000
+      API_KEY: meeting-room-secret-key-2024
+      JWT_SECRET: meeting-room-jwt-secret-change-me
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/app/uploads
+    command: sh -c "npx prisma migrate deploy && npm run prisma:seed && node src/index.js"
+
+  nginx:
+    build:
+      context: ./nginx
+    container_name: meeting-room-nginx
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./admin-web:/usr/share/nginx/html/admin:ro
+      - ./frontend/build/web-kiosk:/usr/share/nginx/html/kiosk:ro
+      - ./frontend/build/web-counter:/usr/share/nginx/html/counter:ro
+
+volumes:
+  postgres_data:

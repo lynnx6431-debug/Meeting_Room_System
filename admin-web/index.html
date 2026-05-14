@@ -1,0 +1,3056 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin 3.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <div class="mx-auto max-w-7xl px-4 py-6">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div class="text-sm text-slate-500">Meeting Room Services</div>
+          <h1 class="text-2xl font-semibold tracking-tight">Admin 3.0</h1>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <div id="statusBadge" class="inline-flex items-center gap-2 rounded-full bg-slate-200 px-3 py-1 text-sm text-slate-700">
+            <span class="h-2 w-2 rounded-full bg-slate-500"></span>
+            <span id="statusText">未连接</span>
+          </div>
+          <select
+            id="langSelect"
+            class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50"
+            title="Language"
+          >
+            <option value="zh">简体</option>
+            <option value="zh-Hant">繁體</option>
+            <option value="en">EN</option>
+          </select>
+          <button id="globalRefreshBtn" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
+            全局刷新
+          </button>
+          <button id="logoutBtn" class="hidden rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-50">
+            退出登录
+          </button>
+        </div>
+      </div>
+
+      <div id="msg" class="mt-3 text-sm text-slate-500"></div>
+
+      <div id="loginView" class="mt-10 flex justify-center">
+        <div class="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6">
+          <div id="loginTitle" class="text-sm text-slate-500">管理员登录</div>
+          <div class="mt-4 space-y-3">
+            <input id="loginUsername" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="用户名" />
+            <div class="relative">
+              <input id="loginPassword" type="password" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm" placeholder="密码" />
+              <button id="loginPwToggle" type="button" class="absolute inset-y-0 right-0 inline-flex items-center px-3 text-slate-500 hover:text-slate-700" aria-label="显示或隐藏密码"></button>
+            </div>
+            <button id="loginBtn" class="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">登录</button>
+          </div>
+          <div id="loginHint" class="mt-4 text-xs text-slate-500">默认超级管理员：admin / admin123</div>
+        </div>
+      </div>
+
+      <div id="appView" class="hidden">
+        <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div class="rounded-xl border border-slate-200 bg-white p-4 lg:col-span-3">
+            <div id="quickStatsTitle" class="text-sm font-medium text-slate-700">快速报表</div>
+            <div class="mt-3 grid grid-cols-3 gap-3">
+              <div class="rounded-lg bg-slate-50 p-3">
+                <div id="statLabelTotal" class="text-xs text-slate-500">总订单</div>
+                <div id="statTotal" class="mt-1 text-xl font-semibold">-</div>
+              </div>
+              <div class="rounded-lg bg-slate-50 p-3">
+                <div id="statLabelPending" class="text-xs text-slate-500">待处理</div>
+                <div id="statPending" class="mt-1 text-xl font-semibold">-</div>
+              </div>
+              <div class="rounded-lg bg-slate-50 p-3">
+                <div id="statLabelCompleted" class="text-xs text-slate-500">已完成</div>
+                <div id="statCompleted" class="mt-1 text-xl font-semibold">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <div class="mt-6 rounded-xl border border-slate-200 bg-white">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+          <div class="flex flex-wrap gap-2">
+            <button data-tab="orders" class="tabBtn rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white">订单列表</button>
+            <button data-tab="menu" class="tabBtn rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">商品管理</button>
+            <button data-tab="categories" class="tabBtn rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">分类管理</button>
+            <button data-tab="counters" class="tabBtn rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">柜台管理</button>
+            <button data-tab="rooms" class="tabBtn rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">房间管理</button>
+            <button data-tab="reports" class="tabBtn rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">报表</button>
+            <button data-tab="settings" class="tabBtn rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">设置</button>
+          </div>
+          <div class="text-xs text-slate-500">JWT 已启用</div>
+        </div>
+
+        <div id="tab_orders" class="p-4">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-wrap items-center gap-2">
+              <div id="ordersFilterLabel" class="text-sm font-medium text-slate-700">筛选</div>
+              <select id="orderStatusFilter" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"></select>
+              <div id="orderCount" class="text-sm text-slate-500"></div>
+            </div>
+            <div id="ordersSocketTip" class="text-xs text-slate-500">Socket 实时同步</div>
+          </div>
+
+          <div class="mt-4 overflow-hidden rounded-xl border border-slate-200">
+            <table class="min-w-full divide-y divide-slate-200">
+              <thead class="bg-slate-50">
+                <tr>
+                  <th id="ordersThRoom" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">房间</th>
+                  <th id="ordersThStatus" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">状态</th>
+                  <th id="ordersThCreatedAt" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">创建时间（香港 UTC+8）</th>
+                  <th id="ordersThItems" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">内容</th>
+                  <th id="ordersThActions" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">操作</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTbody" class="divide-y divide-slate-200 bg-white"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tab_menu" class="hidden p-4">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div id="menuCreateTitle" class="text-sm font-semibold text-slate-800">新增商品</div>
+              <div class="mt-3 space-y-3">
+                <button id="menuOpenCreateModalBtn" class="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">创建</button>
+              </div>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 bg-white p-4 lg:col-span-2">
+              <div class="flex items-center justify-between gap-3">
+                <div id="menuListTitle" class="text-sm font-semibold text-slate-800">商品列表</div>
+                <button id="menuRefreshBtn" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50">刷新</button>
+              </div>
+              <div class="mt-4 overflow-hidden rounded-xl border border-slate-200">
+                <table class="min-w-full divide-y divide-slate-200">
+                  <thead class="bg-slate-50">
+                    <tr>
+                      <th id="menuThName" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">名称</th>
+                      <th id="menuThCategory" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">分类</th>
+                      <th id="menuThStock" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">库存</th>
+                      <th id="menuThActive" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">启用</th>
+                      <th id="menuThActions" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="menuTbody" class="divide-y divide-slate-200 bg-white"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab_categories" class="hidden p-4">
+          <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div id="categoriesTitle" class="text-sm font-semibold text-slate-800">分类管理</div>
+              <div class="flex flex-wrap gap-2">
+                <button id="categoriesPageRefreshBtn" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50">刷新</button>
+                <button id="categoriesAddBtn" class="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800">+ 新增分类</button>
+              </div>
+            </div>
+            <div class="mt-4 overflow-hidden rounded-xl border border-slate-200">
+              <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                  <tr>
+                    <th id="categoriesThIcon" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">图标</th>
+                    <th id="categoriesThKey" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">Key</th>
+                    <th id="categoriesThZh" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">简体</th>
+                    <th id="categoriesThEn" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">EN</th>
+                    <th id="categoriesThHant" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">繁体</th>
+                    <th id="categoriesThActions" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="categoriesTbody" class="divide-y divide-slate-200 bg-white"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab_counters" class="hidden p-4">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div id="counterCreateTitle" class="text-sm font-semibold text-slate-800">新增柜台</div>
+              <div class="mt-3 space-y-3">
+                <input
+                  id="counterName"
+                  class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+                  placeholder="柜台名称（如 水吧、零食部、热餐区）"
+                />
+                <details class="rounded-lg border border-slate-200 bg-white p-3">
+                  <summary id="counterI18nSummary" class="cursor-pointer text-sm font-medium text-slate-700">多语言名称</summary>
+                  <div class="mt-3 space-y-2">
+                    <input id="counterNameZh" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="中文名称（可选）" />
+                    <input id="counterNameEn" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="English name (optional)" />
+                    <input id="counterNameHant" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="繁體名稱（可選）" />
+                  </div>
+                </details>
+                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                  <div id="counterCategoryTitle" class="text-xs font-medium text-slate-600">关联分类（多选）</div>
+                  <div id="counterCategoryList" class="mt-2 space-y-1"></div>
+                  <div id="counterCategoryHint" class="mt-2 text-xs text-slate-500">分类来自系统分类表；若分类已分配给其他柜台，保存时将提示是否转移。</div>
+                </div>
+                <details class="rounded-lg border border-slate-200 bg-white p-3">
+                  <summary id="categoryI18nSummary" class="cursor-pointer text-sm font-medium text-slate-700">分类名称（多语言）</summary>
+                  <div class="mt-3 flex items-center justify-between gap-2">
+                    <div id="categoryI18nHint" class="text-xs text-slate-500">分类 key 不变，仅用于不同语言显示。</div>
+                    <button id="categoriesRefreshBtn" type="button" class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium hover:bg-slate-50">刷新</button>
+                  </div>
+                  <div id="categoryI18nList" class="mt-3 space-y-2"></div>
+                </details>
+                <button id="counterCreateBtn" class="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
+                  创建
+                </button>
+              </div>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 bg-white p-4 lg:col-span-2">
+              <div class="flex items-center justify-between gap-3">
+                <div id="counterListTitle" class="text-sm font-semibold text-slate-800">柜台列表</div>
+                <button
+                  id="countersRefreshBtn"
+                  class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50"
+                >
+                  刷新
+                </button>
+              </div>
+              <div class="mt-4 overflow-hidden rounded-xl border border-slate-200">
+                <table class="min-w-full divide-y divide-slate-200">
+                  <thead class="bg-slate-50">
+                    <tr>
+                      <th id="countersThName" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">名称</th>
+                      <th id="countersThCats" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">负责分类</th>
+                      <th id="countersThActions" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="countersTbody" class="divide-y divide-slate-200 bg-white"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab_rooms" class="hidden p-4">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div id="roomCreateTitle" class="text-sm font-semibold text-slate-800">新增房间</div>
+              <div class="mt-3 space-y-3">
+                <input id="roomName" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="会议室名称（如 A101）" />
+                <input id="roomCode" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="标识符（可留空自动生成）" />
+                <button id="roomCreateBtn" class="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">创建</button>
+              </div>
+              <div id="roomHint" class="mt-3 text-xs text-slate-500">标识符将用于订单 roomId。</div>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 bg-white p-4 lg:col-span-2">
+              <div class="flex items-center justify-between gap-3">
+                <div id="roomListTitle" class="text-sm font-semibold text-slate-800">房间列表</div>
+                <button id="roomsRefreshBtn" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50">刷新</button>
+              </div>
+              <div class="mt-4 overflow-hidden rounded-xl border border-slate-200">
+                <table class="min-w-full divide-y divide-slate-200">
+                  <thead class="bg-slate-50">
+                    <tr>
+                      <th id="roomsThName" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">名称</th>
+                      <th id="roomsThCode" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">标识符</th>
+                      <th id="roomsThActions" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="roomsTbody" class="divide-y divide-slate-200 bg-white"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab_reports" class="hidden p-4">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div id="reportsTitle" class="text-sm font-semibold text-slate-800">订单报表</div>
+            <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-600">
+              <div id="reportsDesc">展示全量统计，按需可后续扩展到按日期、按房间等维度。</div>
+              <div class="text-xs text-slate-500"><span id="reportsTimeLabel">统计时间（香港 UTC+8）：</span><span id="reportTime" class="font-medium text-slate-700">-</span></div>
+            </div>
+            <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div class="rounded-xl bg-white p-4">
+                <div id="reportLabelTotal" class="text-xs text-slate-500">总订单</div>
+                <div class="mt-2 text-2xl font-semibold"><span id="reportTotal">-</span></div>
+              </div>
+              <div class="rounded-xl bg-white p-4">
+                <div id="reportLabelStatus" class="text-xs text-slate-500">状态分布（待处理 / 已完成）</div>
+                <div class="mt-2 text-2xl font-semibold"><span id="reportPending">-</span> / <span id="reportCompleted">-</span></div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <button id="reportsRefreshBtn" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">刷新报表</button>
+            </div>
+
+            <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+              <div class="rounded-xl bg-white p-4 lg:col-span-2">
+                <div id="salesChartTitle" class="text-sm font-semibold text-slate-800">销量柱状图（Top 10）</div>
+                <div class="mt-3">
+                  <canvas id="salesChart" height="140"></canvas>
+                </div>
+              </div>
+              <div class="rounded-xl bg-white p-4">
+                <div id="statusChartTitle" class="text-sm font-semibold text-slate-800">状态饼图</div>
+                <div class="mt-3">
+                  <canvas id="statusChart" height="140"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="tab_settings" class="hidden p-4">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div id="settingsPwTitle" class="text-sm font-semibold text-slate-800">修改密码</div>
+              <div class="mt-3 space-y-3">
+                <div class="relative">
+                  <input id="pwCurrent" type="password" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm" placeholder="当前密码" />
+                  <button id="pwCurrentToggle" type="button" class="absolute inset-y-0 right-0 inline-flex items-center px-3 text-slate-500 hover:text-slate-700" aria-label="显示或隐藏当前密码"></button>
+                </div>
+                <div class="relative">
+                  <input id="pwNext" type="password" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm" placeholder="新密码（至少 6 位）" />
+                  <button id="pwNextToggle" type="button" class="absolute inset-y-0 right-0 inline-flex items-center px-3 text-slate-500 hover:text-slate-700" aria-label="显示或隐藏新密码"></button>
+                </div>
+                <button id="pwUpdateBtn" class="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">保存</button>
+              </div>
+            </div>
+            <div id="superOnlyPanel" class="hidden rounded-xl border border-slate-200 bg-white p-4 lg:col-span-2">
+              <div id="superSettingsTitle" class="text-sm font-semibold text-slate-800">超级管理员设置</div>
+              <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div id="apiKeyPanelTitle" class="text-sm font-semibold text-slate-800">系统配置（API Key）</div>
+                  <div class="mt-3 space-y-3">
+                    <input id="apiKeyValue" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="API Key" />
+                    <div class="flex gap-2">
+                      <button id="apiKeyLoadBtn" class="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50">刷新</button>
+                      <button id="apiKeySaveBtn" class="flex-1 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800">保存</button>
+                      <button id="apiKeyResetBtn" class="flex-1 rounded-lg bg-rose-600 px-3 py-2 text-sm font-medium text-white hover:bg-rose-700">重置</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div id="newUserTitle" class="text-sm font-semibold text-slate-800">新增管理员</div>
+                  <div class="mt-3 space-y-3">
+                    <input id="newUserUsername" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="用户名" />
+                    <div class="relative">
+                      <input id="newUserPassword" type="password" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm" placeholder="初始密码（至少 6 位）" />
+                      <button id="newUserPasswordToggle" type="button" class="absolute inset-y-0 right-0 inline-flex items-center px-3 text-slate-500 hover:text-slate-700" aria-label="显示或隐藏初始密码"></button>
+                    </div>
+                    <select id="newUserRole" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+                      <option value="ADMIN">ADMIN</option>
+                      <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+                    </select>
+                    <button id="newUserCreateBtn" class="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">创建</button>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 overflow-hidden rounded-xl border border-slate-200">
+                <table class="min-w-full divide-y divide-slate-200">
+                  <thead class="bg-slate-50">
+                    <tr>
+                      <th id="usersThUsername" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">用户名</th>
+                      <th id="usersThRole" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">角色</th>
+                      <th id="usersThCreatedAt" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">创建时间（香港 UTC+8）</th>
+                      <th id="usersThActions" class="px-4 py-3 text-left text-xs font-semibold text-slate-600">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="usersTbody" class="divide-y divide-slate-200 bg-white"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <div id="menuEditModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
+      <div class="w-full max-w-2xl rounded-xl bg-white p-5 shadow-xl">
+        <div class="flex items-center justify-between">
+          <div id="menuEditTitle" class="text-sm font-semibold text-slate-800">编辑商品</div>
+          <button id="menuEditClose" class="rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100">✕</button>
+        </div>
+        <div class="mt-4 space-y-3">
+          <input id="editMenuId" type="hidden" />
+          <input id="editMenuName" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm" disabled />
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <input id="editMenuCategory" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="分类" />
+            <input id="editMenuStock" type="number" min="0" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="库存" />
+          </div>
+          <label class="flex items-center gap-2 text-sm text-slate-700">
+            <input id="editMenuActive" type="checkbox" class="h-4 w-4 rounded border-slate-300" />
+            <span id="editMenuActiveLabel">启用</span>
+          </label>
+          <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <div id="editMenuImageTitle" class="text-xs font-semibold text-slate-700">图片</div>
+            <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start">
+              <div class="h-24 w-24 overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <img id="editMenuImagePreview" class="hidden h-full w-full object-cover" alt="preview" />
+                <div id="editMenuImagePlaceholder" class="flex h-full w-full items-center justify-center text-xs text-slate-400">No Image</div>
+              </div>
+              <div class="flex-1 space-y-2">
+                <input id="editMenuImageFile" type="file" accept="image/*" class="block w-full text-sm text-slate-700" />
+                <div id="editMenuImageUrlText" class="break-all text-xs text-slate-500"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <div class="flex flex-wrap gap-2">
+              <button id="editLangTabZh" type="button" class="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100">简体</button>
+              <button id="editLangTabEn" type="button" class="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100">English</button>
+              <button id="editLangTabHant" type="button" class="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100">繁体</button>
+            </div>
+
+            <div id="editPaneZh" class="mt-3 space-y-2">
+              <input id="editMenuNameZh" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="名称（简体）" />
+              <textarea id="editMenuDescZh" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" rows="3" placeholder="描述（简体）"></textarea>
+            </div>
+            <div id="editPaneEn" class="mt-3 hidden space-y-2">
+              <input id="editMenuNameEn" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="Name (English)" />
+              <textarea id="editMenuDescEn" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" rows="3" placeholder="Description (English)"></textarea>
+            </div>
+            <div id="editPaneHant" class="mt-3 hidden space-y-2">
+              <input id="editMenuNameHant" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="名稱（繁體）" />
+              <textarea id="editMenuDescHant" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" rows="3" placeholder="描述（繁體）"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="mt-5 flex justify-end gap-2">
+          <button id="menuEditCancelBtn" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-50">取消</button>
+          <button id="menuEditSaveBtn" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="menuCreateModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
+      <div class="w-full max-w-2xl rounded-xl bg-white p-5 shadow-xl">
+        <div class="flex items-center justify-between">
+          <div id="menuCreateModalTitle" class="text-sm font-semibold text-slate-800">新增商品</div>
+          <button id="menuCreateClose" class="rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100">✕</button>
+        </div>
+        <div class="mt-4 space-y-3">
+          <input id="menuName" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="名称（唯一）" />
+          <div class="space-y-2">
+            <select id="menuCategory" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"></select>
+            <button id="menuCategoryAddBtn" type="button" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50">+ 新增分类</button>
+          </div>
+          <input id="menuStock" type="number" min="0" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="库存" />
+          <label class="flex items-center gap-2 text-sm text-slate-700">
+            <input id="menuActive" type="checkbox" class="h-4 w-4 rounded border-slate-300" checked />
+            <span id="menuActiveLabel">启用（库存为 0 时点餐端显示售罄）</span>
+          </label>
+          <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <div id="menuCreateImageTitle" class="text-xs font-semibold text-slate-700">图片</div>
+            <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start">
+              <div class="h-24 w-24 overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <img id="menuCreateImagePreview" class="hidden h-full w-full object-cover" alt="preview" />
+                <div id="menuCreateImagePlaceholder" class="flex h-full w-full items-center justify-center text-xs text-slate-400">No Image</div>
+              </div>
+              <div class="flex-1 space-y-2">
+                <input id="menuCreateImageFile" type="file" accept="image/*" class="block w-full text-sm text-slate-700" />
+                <div id="menuCreateImageUrlText" class="break-all text-xs text-slate-500"></div>
+              </div>
+            </div>
+          </div>
+          <details class="rounded-lg border border-slate-200 bg-white p-3">
+            <summary id="menuI18nSummary" class="cursor-pointer text-sm font-medium text-slate-700">多语言名称/描述</summary>
+            <div class="mt-3 space-y-3">
+              <div class="grid grid-cols-1 gap-2">
+                <input id="menuNameZh" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="中文名称（可选）" />
+                <input id="menuNameEn" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="English Name (optional)" />
+                <input id="menuNameHant" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="繁體名稱（可選）" />
+              </div>
+              <div class="grid grid-cols-1 gap-2">
+                <textarea id="menuDescZh" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" rows="2" placeholder="中文描述（可选）"></textarea>
+                <textarea id="menuDescEn" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" rows="2" placeholder="English Description (optional)"></textarea>
+                <textarea id="menuDescHant" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" rows="2" placeholder="繁體描述（可選）"></textarea>
+              </div>
+            </div>
+          </details>
+        </div>
+        <div class="mt-5 flex justify-end gap-2">
+          <button id="menuCreateCancelBtn" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-50">取消</button>
+          <button id="menuCreateBtn" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">创建</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="categoryModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
+      <div class="w-full max-w-2xl rounded-xl bg-white p-5 shadow-xl">
+        <div class="flex items-center justify-between">
+          <div id="categoryModalTitle" class="text-sm font-semibold text-slate-800">新增分类</div>
+          <button id="categoryClose" class="rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100">✕</button>
+        </div>
+        <div class="mt-4 space-y-3">
+          <input id="categoryId" type="hidden" />
+          <input id="categoryKey" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="分类 Key（唯一，如 Snacks / Drinks）" />
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <input id="categoryNameZh" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="中文名（可选）" />
+            <input id="categoryNameEn" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="English name (optional)" />
+            <input id="categoryNameHant" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" placeholder="繁體名（可選）" />
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <div id="categoryImageTitle" class="text-xs font-semibold text-slate-700">图标（PNG 透明）</div>
+            <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start">
+              <div class="h-20 w-20 overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <img id="categoryImagePreview" class="hidden h-full w-full object-contain p-2" alt="preview" />
+                <div id="categoryImagePlaceholder" class="flex h-full w-full items-center justify-center text-xs text-slate-400">No Image</div>
+              </div>
+              <div class="flex-1 space-y-2">
+                <input id="categoryImageFile" type="file" accept="image/png" class="block w-full text-sm text-slate-700" />
+                <div id="categoryImageUrlText" class="break-all text-xs text-slate-500"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-5 flex justify-end gap-2">
+          <button id="categoryCancelBtn" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-50">取消</button>
+          <button id="categorySaveBtn" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script>
+      const apiBase = '/api';
+
+      const msgEl = document.getElementById('msg');
+      const statusBadge = document.getElementById('statusBadge');
+      const statusText = document.getElementById('statusText');
+      const langSelect = document.getElementById('langSelect');
+      const globalRefreshBtn = document.getElementById('globalRefreshBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      const tabButtons = Array.from(document.querySelectorAll('.tabBtn'));
+      const tabIds = ['orders', 'menu', 'categories', 'counters', 'rooms', 'reports', 'settings'];
+
+      const uiDict = {
+        zh: {
+          status: { connected: '已连接', disconnected: '未连接' },
+          login: {
+            title: '管理员登录',
+            usernamePh: '用户名',
+            passwordPh: '密码',
+            button: '登录',
+            hint: '默认超级管理员：admin / admin123',
+          },
+          globalRefresh: '全局刷新',
+          logout: '退出登录',
+          tabs: { orders: '订单列表', menu: '商品管理', categories: '分类管理', counters: '柜台管理', rooms: '房间管理', reports: '报表', settings: '设置' },
+          actions: { create: '创建', refresh: '刷新', edit: '编辑', delete: '删除', save: '保存', editCats: '编辑分类' },
+          stats: { quickTitle: '快速报表', total: '总订单', pending: '待处理', completed: '已完成' },
+          orders: {
+            filter: '筛选',
+            socketTip: 'Socket 实时同步',
+            thRoom: '房间',
+            thStatus: '状态',
+            thCreatedAt: '创建时间（香港 UTC+8）',
+            thItems: '内容',
+            thActions: '操作',
+            count: '共 {n} 条',
+            statusAll: '全部',
+            statusPending: '待处理',
+            statusCompleted: '已完成',
+            pillPending: '待处理',
+            pillCompleted: '已完成',
+            btnComplete: '标记完成',
+          },
+          reports: {
+            title: '订单报表',
+            desc: '展示全量统计，按需可后续扩展到按日期、按房间等维度。',
+            timeLabel: '统计时间（香港 UTC+8）：',
+            labelTotal: '总订单',
+            labelStatus: '状态分布（待处理 / 已完成）',
+            refresh: '刷新报表',
+            salesChartTitle: '销量柱状图（Top 10）',
+            statusChartTitle: '状态饼图',
+            salesDataset: '销售件数',
+            others: '其它',
+          },
+          settings: {
+            pwTitle: '修改密码',
+            pwCurrentPh: '当前密码',
+            pwNextPh: '新密码（至少 6 位）',
+            pwSave: '保存',
+            superTitle: '超级管理员设置',
+            apiKeyTitle: '系统配置（API Key）',
+            apiKeyLoad: '刷新',
+            apiKeySave: '保存',
+            apiKeyReset: '重置',
+            newUserTitle: '新增管理员',
+            newUserUsernamePh: '用户名',
+            newUserPasswordPh: '初始密码（至少 6 位）',
+            newUserCreate: '创建',
+            usersThUsername: '用户名',
+            usersThRole: '角色',
+            usersThCreatedAt: '创建时间（香港 UTC+8）',
+            usersThActions: '操作',
+          },
+          menuEdit: {
+            title: '编辑商品',
+            categoryPh: '分类',
+            stockPh: '库存',
+            activeLabel: '启用',
+            imageTitle: '图片',
+            noImage: 'No Image',
+            cancel: '取消',
+            save: '保存',
+          },
+          menu: {
+            createTitle: '新增商品',
+            createModalTitle: '新增商品',
+            listTitle: '商品列表',
+            namePh: '名称（唯一）',
+            categoryPh: '分类（如 Drinks）',
+            categorySelectPh: '请选择分类',
+            stockPh: '库存',
+            activeLabel: '启用（库存为 0 时点餐端显示售罄）',
+            i18nSummary: '多语言名称/描述',
+            nameZhPh: '中文名称（可选）',
+            nameEnPh: 'English Name (optional)',
+            nameHantPh: '繁體名稱（可選）',
+            descZhPh: '中文描述（可选）',
+            descEnPh: 'English Description (optional)',
+            descHantPh: '繁體描述（可選）',
+            thName: '名称',
+            thCategory: '分类',
+            thStock: '库存',
+            thActive: '启用',
+            thActions: '操作',
+            activeYes: '是',
+            activeNo: '否',
+          },
+          counters: {
+            createTitle: '新增柜台',
+            listTitle: '柜台列表',
+            namePh: '柜台名称（如 水吧、零食部、热餐区）',
+            i18nSummary: '多语言名称',
+            nameZhPh: '中文名称（可选）',
+            nameEnPh: 'English name (optional)',
+            nameHantPh: '繁體名稱（可選）',
+            catTitle: '关联分类（多选）',
+            catHint: '分类来自系统分类表；若分类已分配给其他柜台，保存时将提示是否转移。',
+            thName: '名称',
+            thCats: '负责分类',
+            thActions: '操作',
+          },
+          categories: {
+            i18nSummary: '分类名称（多语言）',
+            hint: '分类 key 不变，仅用于不同语言显示。',
+            zhPh: '中文名（可选）',
+            enPh: 'English name (optional)',
+            hantPh: '繁體名（可選）',
+            tabTitle: '分类管理',
+            add: '+ 新增分类',
+            icon: '图标',
+            key: 'Key',
+            save: '保存',
+            createTitle: '新增分类',
+            editTitle: '编辑分类',
+            keyPh: '分类 Key（唯一，如 Snacks / Drinks）',
+            imageTitle: '图标（PNG 透明）',
+          },
+          rooms: {
+            createTitle: '新增房间',
+            listTitle: '房间列表',
+            namePh: '会议室名称（如 A101）',
+            codePh: '标识符（可留空自动生成）',
+            hint: '标识符将用于订单 roomId。',
+            thName: '名称',
+            thCode: '标识符',
+            thActions: '操作',
+          },
+        },
+        en: {
+          status: { connected: 'Connected', disconnected: 'Disconnected' },
+          login: {
+            title: 'Admin Login',
+            usernamePh: 'Username',
+            passwordPh: 'Password',
+            button: 'Login',
+            hint: 'Default SUPER_ADMIN: admin / admin123',
+          },
+          globalRefresh: 'Refresh All',
+          logout: 'Logout',
+          tabs: { orders: 'Orders', menu: 'Menu', categories: 'Categories', counters: 'Counters', rooms: 'Rooms', reports: 'Reports', settings: 'Settings' },
+          actions: { create: 'Create', refresh: 'Refresh', edit: 'Edit', delete: 'Delete', save: 'Save', editCats: 'Edit Categories' },
+          stats: { quickTitle: 'Quick Stats', total: 'Total Orders', pending: 'Pending', completed: 'Completed' },
+          orders: {
+            filter: 'Filter',
+            socketTip: 'Real-time sync',
+            thRoom: 'Room',
+            thStatus: 'Status',
+            thCreatedAt: 'Created (HK UTC+8)',
+            thItems: 'Items',
+            thActions: 'Actions',
+            count: '{n} orders',
+            statusAll: 'All',
+            statusPending: 'Pending',
+            statusCompleted: 'Completed',
+            pillPending: 'PENDING',
+            pillCompleted: 'COMPLETED',
+            btnComplete: 'Mark Completed',
+          },
+          reports: {
+            title: 'Order Reports',
+            desc: 'Shows overall stats. Can be extended to date/room dimensions later.',
+            timeLabel: 'Stats time (HK UTC+8): ',
+            labelTotal: 'Total Orders',
+            labelStatus: 'Status distribution (Pending / Completed)',
+            refresh: 'Refresh Reports',
+            salesChartTitle: 'Top Sales (Top 10)',
+            statusChartTitle: 'Status Pie',
+            salesDataset: 'Qty Sold',
+            others: 'Others',
+          },
+          settings: {
+            pwTitle: 'Change Password',
+            pwCurrentPh: 'Current password',
+            pwNextPh: 'New password (min 6 chars)',
+            pwSave: 'Save',
+            superTitle: 'Super Admin Settings',
+            apiKeyTitle: 'System Config (API Key)',
+            apiKeyLoad: 'Refresh',
+            apiKeySave: 'Save',
+            apiKeyReset: 'Reset',
+            newUserTitle: 'Add Admin User',
+            newUserUsernamePh: 'Username',
+            newUserPasswordPh: 'Initial password (min 6 chars)',
+            newUserCreate: 'Create',
+            usersThUsername: 'Username',
+            usersThRole: 'Role',
+            usersThCreatedAt: 'Created (HK UTC+8)',
+            usersThActions: 'Actions',
+          },
+          menuEdit: {
+            title: 'Edit Item',
+            categoryPh: 'Category',
+            stockPh: 'Stock',
+            activeLabel: 'Active',
+            imageTitle: 'Image',
+            noImage: 'No Image',
+            cancel: 'Cancel',
+            save: 'Save',
+          },
+          menu: {
+            createTitle: 'Add Item',
+            createModalTitle: 'Add Item',
+            listTitle: 'Items',
+            namePh: 'Name (unique)',
+            categoryPh: 'Category (e.g. Drinks)',
+            categorySelectPh: 'Select category',
+            stockPh: 'Stock',
+            activeLabel: 'Active (shows Sold Out when stock is 0)',
+            i18nSummary: 'Translations (Name/Description)',
+            nameZhPh: 'Chinese name (optional)',
+            nameEnPh: 'English name (optional)',
+            nameHantPh: 'Traditional name (optional)',
+            descZhPh: 'Chinese description (optional)',
+            descEnPh: 'English description (optional)',
+            descHantPh: 'Traditional description (optional)',
+            thName: 'Name',
+            thCategory: 'Category',
+            thStock: 'Stock',
+            thActive: 'Active',
+            thActions: 'Actions',
+            activeYes: 'Yes',
+            activeNo: 'No',
+          },
+          counters: {
+            createTitle: 'Add Counter',
+            listTitle: 'Counters',
+            namePh: 'Counter name (e.g. Drinks, Snacks)',
+            i18nSummary: 'Translations (Name)',
+            nameZhPh: 'Chinese name (optional)',
+            nameEnPh: 'English name (optional)',
+            nameHantPh: 'Traditional name (optional)',
+            catTitle: 'Categories (multi-select)',
+            catHint: 'Categories come from the system. If a category is assigned to another counter, you will be asked to transfer it.',
+            thName: 'Name',
+            thCats: 'Categories',
+            thActions: 'Actions',
+          },
+          categories: {
+            i18nSummary: 'Category Translations',
+            hint: 'Category key stays unchanged; used for display only.',
+            zhPh: 'Chinese name (optional)',
+            enPh: 'English name (optional)',
+            hantPh: 'Traditional name (optional)',
+            tabTitle: 'Categories',
+            add: '+ Add Category',
+            icon: 'Icon',
+            key: 'Key',
+            save: 'Save',
+            createTitle: 'Add Category',
+            editTitle: 'Edit Category',
+            keyPh: 'Category key (unique, e.g. Snacks / Drinks)',
+            imageTitle: 'Icon (transparent PNG)',
+          },
+          rooms: {
+            createTitle: 'Add Room',
+            listTitle: 'Rooms',
+            namePh: 'Room name (e.g. A101)',
+            codePh: 'Code (leave blank to auto-generate)',
+            hint: 'Code is used as order roomId.',
+            thName: 'Name',
+            thCode: 'Code',
+            thActions: 'Actions',
+          },
+        },
+        'zh-Hant': {
+          status: { connected: '已連線', disconnected: '未連線' },
+          login: {
+            title: '管理員登入',
+            usernamePh: '使用者名稱',
+            passwordPh: '密碼',
+            button: '登入',
+            hint: '預設超級管理員：admin / admin123',
+          },
+          globalRefresh: '全局刷新',
+          logout: '退出登入',
+          tabs: { orders: '訂單列表', menu: '商品管理', categories: '分類管理', counters: '櫃台管理', rooms: '房間管理', reports: '報表', settings: '設定' },
+          actions: { create: '建立', refresh: '刷新', edit: '編輯', delete: '刪除', save: '保存', editCats: '編輯分類' },
+          stats: { quickTitle: '快速報表', total: '總訂單', pending: '待處理', completed: '已完成' },
+          orders: {
+            filter: '篩選',
+            socketTip: 'Socket 即時同步',
+            thRoom: '房間',
+            thStatus: '狀態',
+            thCreatedAt: '建立時間（香港 UTC+8）',
+            thItems: '內容',
+            thActions: '操作',
+            count: '共 {n} 條',
+            statusAll: '全部',
+            statusPending: '待處理',
+            statusCompleted: '已完成',
+            pillPending: '待處理',
+            pillCompleted: '已完成',
+            btnComplete: '標記完成',
+          },
+          reports: {
+            title: '訂單報表',
+            desc: '展示全量統計，按需可後續擴展到按日期、按房間等維度。',
+            timeLabel: '統計時間（香港 UTC+8）：',
+            labelTotal: '總訂單',
+            labelStatus: '狀態分布（待處理 / 已完成）',
+            refresh: '刷新報表',
+            salesChartTitle: '銷量柱狀圖（Top 10）',
+            statusChartTitle: '狀態圓餅圖',
+            salesDataset: '銷售件數',
+            others: '其它',
+          },
+          settings: {
+            pwTitle: '修改密碼',
+            pwCurrentPh: '目前密碼',
+            pwNextPh: '新密碼（至少 6 位）',
+            pwSave: '保存',
+            superTitle: '超級管理員設定',
+            apiKeyTitle: '系統設定（API Key）',
+            apiKeyLoad: '刷新',
+            apiKeySave: '保存',
+            apiKeyReset: '重置',
+            newUserTitle: '新增管理員',
+            newUserUsernamePh: '使用者名稱',
+            newUserPasswordPh: '初始密碼（至少 6 位）',
+            newUserCreate: '建立',
+            usersThUsername: '使用者名稱',
+            usersThRole: '角色',
+            usersThCreatedAt: '建立時間（香港 UTC+8）',
+            usersThActions: '操作',
+          },
+          menuEdit: {
+            title: '編輯商品',
+            categoryPh: '分類',
+            stockPh: '庫存',
+            activeLabel: '啟用',
+            imageTitle: '圖片',
+            noImage: 'No Image',
+            cancel: '取消',
+            save: '保存',
+          },
+          menu: {
+            createTitle: '新增商品',
+            createModalTitle: '新增商品',
+            listTitle: '商品列表',
+            namePh: '名稱（唯一）',
+            categoryPh: '分類（如 Drinks）',
+            categorySelectPh: '請選擇分類',
+            stockPh: '庫存',
+            activeLabel: '啟用（庫存為 0 時點餐端顯示售罄）',
+            i18nSummary: '多語言名稱/描述',
+            nameZhPh: '中文名稱（可選）',
+            nameEnPh: 'English Name (optional)',
+            nameHantPh: '繁體名稱（可選）',
+            descZhPh: '中文描述（可選）',
+            descEnPh: 'English Description (optional)',
+            descHantPh: '繁體描述（可選）',
+            thName: '名稱',
+            thCategory: '分類',
+            thStock: '庫存',
+            thActive: '啟用',
+            thActions: '操作',
+            activeYes: '是',
+            activeNo: '否',
+          },
+          counters: {
+            createTitle: '新增櫃台',
+            listTitle: '櫃台列表',
+            namePh: '櫃台名稱（如 水吧、零食部）',
+            i18nSummary: '多語言名稱',
+            nameZhPh: '中文名稱（可選）',
+            nameEnPh: 'English name (optional)',
+            nameHantPh: '繁體名稱（可選）',
+            catTitle: '關聯分類（多選）',
+            catHint: '分類來自系統分類表；若分類已分配給其他櫃台，保存時將提示是否轉移。',
+            thName: '名稱',
+            thCats: '負責分類',
+            thActions: '操作',
+          },
+          categories: {
+            i18nSummary: '分類名稱（多語言）',
+            hint: '分類 key 不變，僅用於不同語言顯示。',
+            zhPh: '中文名（可選）',
+            enPh: 'English name (optional)',
+            hantPh: '繁體名（可選）',
+            tabTitle: '分類管理',
+            add: '+ 新增分類',
+            icon: '圖標',
+            key: 'Key',
+            save: '保存',
+            createTitle: '新增分類',
+            editTitle: '編輯分類',
+            keyPh: '分類 Key（唯一，如 Snacks / Drinks）',
+            imageTitle: '圖標（PNG 透明）',
+          },
+          rooms: {
+            createTitle: '新增房間',
+            listTitle: '房間列表',
+            namePh: '會議室名稱（如 A101）',
+            codePh: '識別符（可留空自動生成）',
+            hint: '識別符將用於訂單 roomId。',
+            thName: '名稱',
+            thCode: '識別符',
+            thActions: '操作',
+          },
+        },
+      };
+
+      let uiLang = (localStorage.getItem('ui_lang') || 'zh').trim();
+      if (!uiDict[uiLang]) uiLang = 'zh';
+      langSelect.value = uiLang;
+
+      function tUi(path) {
+        const pick = (obj, p) => {
+          const parts = String(p || '').split('.');
+          let cur = obj;
+          for (const part of parts) {
+            if (!cur || typeof cur !== 'object' || !(part in cur)) return undefined;
+            cur = cur[part];
+          }
+          return cur;
+        };
+        return pick(uiDict[uiLang], path) ?? pick(uiDict.zh, path) ?? path;
+      }
+
+      function applyUiLang() {
+        globalRefreshBtn.textContent = tUi('globalRefresh');
+        logoutBtn.textContent = tUi('logout');
+        tabButtons.forEach((btn) => {
+          const tab = btn.dataset.tab;
+          if (!tab) return;
+          const text = (uiDict[uiLang].tabs && uiDict[uiLang].tabs[tab]) || (uiDict.zh.tabs && uiDict.zh.tabs[tab]) || tab;
+          btn.textContent = text;
+        });
+
+        const setText = (id, text) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = text;
+        };
+        const setPh = (id, text) => {
+          const el = document.getElementById(id);
+          if (el) el.setAttribute('placeholder', text);
+        };
+
+        setText('loginTitle', tUi('login.title'));
+        setText('loginHint', tUi('login.hint'));
+        setPh('loginUsername', tUi('login.usernamePh'));
+        setPh('loginPassword', tUi('login.passwordPh'));
+        setText('loginBtn', tUi('login.button'));
+
+        setText('quickStatsTitle', tUi('stats.quickTitle'));
+        setText('statLabelTotal', tUi('stats.total'));
+        setText('statLabelPending', tUi('stats.pending'));
+        setText('statLabelCompleted', tUi('stats.completed'));
+
+        setText('ordersFilterLabel', tUi('orders.filter'));
+        setText('ordersSocketTip', tUi('orders.socketTip'));
+        setText('ordersThRoom', tUi('orders.thRoom'));
+        setText('ordersThStatus', tUi('orders.thStatus'));
+        setText('ordersThCreatedAt', tUi('orders.thCreatedAt'));
+        setText('ordersThItems', tUi('orders.thItems'));
+        setText('ordersThActions', tUi('orders.thActions'));
+
+        setText('menuCreateTitle', tUi('menu.createTitle'));
+        setText('menuListTitle', tUi('menu.listTitle'));
+        setText('menuActiveLabel', tUi('menu.activeLabel'));
+        setText('menuI18nSummary', tUi('menu.i18nSummary'));
+        setText('menuOpenCreateModalBtn', tUi('menu.createTitle'));
+        setText('menuRefreshBtn', tUi('actions.refresh'));
+        setText('menuThName', tUi('menu.thName'));
+        setText('menuThCategory', tUi('menu.thCategory'));
+        setText('menuThStock', tUi('menu.thStock'));
+        setText('menuThActive', tUi('menu.thActive'));
+        setText('menuThActions', tUi('menu.thActions'));
+        setPh('menuName', tUi('menu.namePh'));
+        buildMenuCategorySelectOptions();
+        setPh('menuStock', tUi('menu.stockPh'));
+        setPh('menuNameZh', tUi('menu.nameZhPh'));
+        setPh('menuNameEn', tUi('menu.nameEnPh'));
+        setPh('menuNameHant', tUi('menu.nameHantPh'));
+        setPh('menuDescZh', tUi('menu.descZhPh'));
+        setPh('menuDescEn', tUi('menu.descEnPh'));
+        setPh('menuDescHant', tUi('menu.descHantPh'));
+
+        setText('counterCreateTitle', tUi('counters.createTitle'));
+        setText('counterListTitle', tUi('counters.listTitle'));
+        setText('counterCategoryTitle', tUi('counters.catTitle'));
+        setText('counterCategoryHint', tUi('counters.catHint'));
+        setText('counterI18nSummary', tUi('counters.i18nSummary'));
+        setText('categoryI18nSummary', tUi('categories.i18nSummary'));
+        setText('categoryI18nHint', tUi('categories.hint'));
+        setText('categoriesRefreshBtn', tUi('actions.refresh'));
+        setText('counterCreateBtn', tUi('actions.create'));
+        setText('countersRefreshBtn', tUi('actions.refresh'));
+        setText('countersThName', tUi('counters.thName'));
+        setText('countersThCats', tUi('counters.thCats'));
+        setText('countersThActions', tUi('counters.thActions'));
+        setPh('counterName', tUi('counters.namePh'));
+        setPh('counterNameZh', tUi('counters.nameZhPh'));
+        setPh('counterNameEn', tUi('counters.nameEnPh'));
+        setPh('counterNameHant', tUi('counters.nameHantPh'));
+
+        setText('roomCreateTitle', tUi('rooms.createTitle'));
+        setText('roomListTitle', tUi('rooms.listTitle'));
+        setText('roomCreateBtn', tUi('actions.create'));
+        setText('roomsRefreshBtn', tUi('actions.refresh'));
+        setText('roomHint', tUi('rooms.hint'));
+        setText('roomsThName', tUi('rooms.thName'));
+        setText('roomsThCode', tUi('rooms.thCode'));
+        setText('roomsThActions', tUi('rooms.thActions'));
+        setPh('roomName', tUi('rooms.namePh'));
+        setPh('roomCode', tUi('rooms.codePh'));
+
+        setText('reportsTitle', tUi('reports.title'));
+        setText('reportsDesc', tUi('reports.desc'));
+        setText('reportsTimeLabel', tUi('reports.timeLabel'));
+        setText('reportLabelTotal', tUi('reports.labelTotal'));
+        setText('reportLabelStatus', tUi('reports.labelStatus'));
+        setText('reportsRefreshBtn', tUi('reports.refresh'));
+        setText('salesChartTitle', tUi('reports.salesChartTitle'));
+        setText('statusChartTitle', tUi('reports.statusChartTitle'));
+
+        setText('settingsPwTitle', tUi('settings.pwTitle'));
+        setPh('pwCurrent', tUi('settings.pwCurrentPh'));
+        setPh('pwNext', tUi('settings.pwNextPh'));
+        setText('pwUpdateBtn', tUi('settings.pwSave'));
+        setText('superSettingsTitle', tUi('settings.superTitle'));
+        setText('apiKeyPanelTitle', tUi('settings.apiKeyTitle'));
+        setText('apiKeyLoadBtn', tUi('settings.apiKeyLoad'));
+        setText('apiKeySaveBtn', tUi('settings.apiKeySave'));
+        setText('apiKeyResetBtn', tUi('settings.apiKeyReset'));
+        setText('newUserTitle', tUi('settings.newUserTitle'));
+        setPh('newUserUsername', tUi('settings.newUserUsernamePh'));
+        setPh('newUserPassword', tUi('settings.newUserPasswordPh'));
+        setText('newUserCreateBtn', tUi('settings.newUserCreate'));
+        setText('usersThUsername', tUi('settings.usersThUsername'));
+        setText('usersThRole', tUi('settings.usersThRole'));
+        setText('usersThCreatedAt', tUi('settings.usersThCreatedAt'));
+        setText('usersThActions', tUi('settings.usersThActions'));
+
+        setText('categoriesTitle', tUi('categories.tabTitle'));
+        setText('categoriesAddBtn', tUi('categories.add'));
+        setText('categoriesPageRefreshBtn', tUi('actions.refresh'));
+        setText('categoriesThIcon', tUi('categories.icon'));
+        setText('categoriesThKey', tUi('categories.key'));
+        setText('categoriesThZh', 'zh');
+        setText('categoriesThEn', 'en');
+        setText('categoriesThHant', 'zh-Hant');
+        setText('categoriesThActions', tUi('menu.thActions'));
+
+        setText('menuCreateModalTitle', tUi('menu.createModalTitle'));
+        setText('menuCreateCancelBtn', tUi('menuEdit.cancel'));
+        setText('menuCreateBtn', tUi('actions.create'));
+        setText('menuCategoryAddBtn', tUi('categories.add'));
+        setText('menuCreateImageTitle', tUi('menuEdit.imageTitle'));
+        setText('menuCreateImagePlaceholder', tUi('menuEdit.noImage'));
+
+        setText('categorySaveBtn', tUi('categories.save'));
+        setText('categoryCancelBtn', tUi('menuEdit.cancel'));
+        setPh('categoryKey', tUi('categories.keyPh'));
+        setPh('categoryNameZh', tUi('categories.zhPh'));
+        setPh('categoryNameEn', tUi('categories.enPh'));
+        setPh('categoryNameHant', tUi('categories.hantPh'));
+        setText('categoryImageTitle', tUi('categories.imageTitle'));
+
+        setText('menuEditTitle', tUi('menuEdit.title'));
+        setPh('editMenuCategory', tUi('menuEdit.categoryPh'));
+        setPh('editMenuStock', tUi('menuEdit.stockPh'));
+        setText('editMenuActiveLabel', tUi('menuEdit.activeLabel'));
+        setText('editMenuImageTitle', tUi('menuEdit.imageTitle'));
+        setText('editMenuImagePlaceholder', tUi('menuEdit.noImage'));
+        setText('menuEditCancelBtn', tUi('menuEdit.cancel'));
+        setText('menuEditSaveBtn', tUi('menuEdit.save'));
+
+        buildOrderStatusFilterOptions();
+
+        if (salesChart) {
+          salesChart.data.datasets[0].label = tUi('reports.salesDataset');
+          salesChart.update();
+        }
+        if (statusChart) {
+          statusChart.data.labels = [tUi('orders.statusPending'), tUi('orders.statusCompleted')];
+          statusChart.update();
+        }
+      }
+
+      langSelect.addEventListener('change', async () => {
+        uiLang = langSelect.value;
+        localStorage.setItem('ui_lang', uiLang);
+        applyUiLang();
+        renderOrdersFromState();
+        updateChartsFromState();
+        await refreshCategories();
+        await refreshMenu();
+        try {
+          await refreshServiceCounters();
+        } catch (_) {
+        }
+      });
+
+      const loginView = document.getElementById('loginView');
+      const appView = document.getElementById('appView');
+      const loginUsername = document.getElementById('loginUsername');
+      const loginPassword = document.getElementById('loginPassword');
+      const loginPwToggle = document.getElementById('loginPwToggle');
+      const loginBtn = document.getElementById('loginBtn');
+
+      const orderStatusFilter = document.getElementById('orderStatusFilter');
+      const ordersTbody = document.getElementById('ordersTbody');
+      const orderCount = document.getElementById('orderCount');
+
+      const menuName = document.getElementById('menuName');
+      const menuCategory = document.getElementById('menuCategory');
+      const menuStock = document.getElementById('menuStock');
+      const menuActive = document.getElementById('menuActive');
+      const menuNameZh = document.getElementById('menuNameZh');
+      const menuNameEn = document.getElementById('menuNameEn');
+      const menuNameHant = document.getElementById('menuNameHant');
+      const menuDescZh = document.getElementById('menuDescZh');
+      const menuDescEn = document.getElementById('menuDescEn');
+      const menuDescHant = document.getElementById('menuDescHant');
+      const menuCreateImageFile = document.getElementById('menuCreateImageFile');
+      const menuCreateImagePreview = document.getElementById('menuCreateImagePreview');
+      const menuCreateImagePlaceholder = document.getElementById('menuCreateImagePlaceholder');
+      const menuCreateImageUrlText = document.getElementById('menuCreateImageUrlText');
+      const menuCreateBtn = document.getElementById('menuCreateBtn');
+      const menuRefreshBtn = document.getElementById('menuRefreshBtn');
+      const menuTbody = document.getElementById('menuTbody');
+      const menuCreateModal = document.getElementById('menuCreateModal');
+      const menuOpenCreateModalBtn = document.getElementById('menuOpenCreateModalBtn');
+      const menuCreateClose = document.getElementById('menuCreateClose');
+      const menuCreateCancelBtn = document.getElementById('menuCreateCancelBtn');
+      const menuCategoryAddBtn = document.getElementById('menuCategoryAddBtn');
+
+      const menuEditModal = document.getElementById('menuEditModal');
+      const menuEditClose = document.getElementById('menuEditClose');
+      const menuEditCancelBtn = document.getElementById('menuEditCancelBtn');
+      const menuEditSaveBtn = document.getElementById('menuEditSaveBtn');
+      const editMenuId = document.getElementById('editMenuId');
+      const editMenuName = document.getElementById('editMenuName');
+      const editMenuCategory = document.getElementById('editMenuCategory');
+      const editMenuStock = document.getElementById('editMenuStock');
+      const editMenuActive = document.getElementById('editMenuActive');
+      const editMenuNameZh = document.getElementById('editMenuNameZh');
+      const editMenuNameEn = document.getElementById('editMenuNameEn');
+      const editMenuNameHant = document.getElementById('editMenuNameHant');
+      const editMenuDescZh = document.getElementById('editMenuDescZh');
+      const editMenuDescEn = document.getElementById('editMenuDescEn');
+      const editMenuDescHant = document.getElementById('editMenuDescHant');
+      const editMenuImageFile = document.getElementById('editMenuImageFile');
+      const editMenuImagePreview = document.getElementById('editMenuImagePreview');
+      const editMenuImagePlaceholder = document.getElementById('editMenuImagePlaceholder');
+      const editMenuImageUrlText = document.getElementById('editMenuImageUrlText');
+      const editLangTabZh = document.getElementById('editLangTabZh');
+      const editLangTabEn = document.getElementById('editLangTabEn');
+      const editLangTabHant = document.getElementById('editLangTabHant');
+      const editPaneZh = document.getElementById('editPaneZh');
+      const editPaneEn = document.getElementById('editPaneEn');
+      const editPaneHant = document.getElementById('editPaneHant');
+
+      const counterName = document.getElementById('counterName');
+      const counterNameZh = document.getElementById('counterNameZh');
+      const counterNameEn = document.getElementById('counterNameEn');
+      const counterNameHant = document.getElementById('counterNameHant');
+      const counterCategoryList = document.getElementById('counterCategoryList');
+      const categoryI18nList = document.getElementById('categoryI18nList');
+      const categoriesRefreshBtn = document.getElementById('categoriesRefreshBtn');
+      const counterCreateBtn = document.getElementById('counterCreateBtn');
+      const countersRefreshBtn = document.getElementById('countersRefreshBtn');
+      const countersTbody = document.getElementById('countersTbody');
+
+      const categoriesTbody = document.getElementById('categoriesTbody');
+      const categoriesAddBtn = document.getElementById('categoriesAddBtn');
+      const categoriesPageRefreshBtn = document.getElementById('categoriesPageRefreshBtn');
+
+      const categoryModal = document.getElementById('categoryModal');
+      const categoryClose = document.getElementById('categoryClose');
+      const categoryCancelBtn = document.getElementById('categoryCancelBtn');
+      const categorySaveBtn = document.getElementById('categorySaveBtn');
+      const categoryId = document.getElementById('categoryId');
+      const categoryKey = document.getElementById('categoryKey');
+      const categoryNameZh = document.getElementById('categoryNameZh');
+      const categoryNameEn = document.getElementById('categoryNameEn');
+      const categoryNameHant = document.getElementById('categoryNameHant');
+      const categoryImageFile = document.getElementById('categoryImageFile');
+      const categoryImagePreview = document.getElementById('categoryImagePreview');
+      const categoryImagePlaceholder = document.getElementById('categoryImagePlaceholder');
+      const categoryImageUrlText = document.getElementById('categoryImageUrlText');
+
+      const roomName = document.getElementById('roomName');
+      const roomCode = document.getElementById('roomCode');
+      const roomCreateBtn = document.getElementById('roomCreateBtn');
+      const roomsRefreshBtn = document.getElementById('roomsRefreshBtn');
+      const roomsTbody = document.getElementById('roomsTbody');
+
+      const statTotal = document.getElementById('statTotal');
+      const statPending = document.getElementById('statPending');
+      const statCompleted = document.getElementById('statCompleted');
+
+      const reportTotal = document.getElementById('reportTotal');
+      const reportPending = document.getElementById('reportPending');
+      const reportCompleted = document.getElementById('reportCompleted');
+      const reportTime = document.getElementById('reportTime');
+      const reportsRefreshBtn = document.getElementById('reportsRefreshBtn');
+
+      const salesChartCanvas = document.getElementById('salesChart');
+      const statusChartCanvas = document.getElementById('statusChart');
+
+      const pwCurrent = document.getElementById('pwCurrent');
+      const pwNext = document.getElementById('pwNext');
+      const pwUpdateBtn = document.getElementById('pwUpdateBtn');
+      const pwCurrentToggle = document.getElementById('pwCurrentToggle');
+      const pwNextToggle = document.getElementById('pwNextToggle');
+
+      const superOnlyPanel = document.getElementById('superOnlyPanel');
+      const apiKeyValue = document.getElementById('apiKeyValue');
+      const apiKeyLoadBtn = document.getElementById('apiKeyLoadBtn');
+      const apiKeySaveBtn = document.getElementById('apiKeySaveBtn');
+      const apiKeyResetBtn = document.getElementById('apiKeyResetBtn');
+
+      const newUserUsername = document.getElementById('newUserUsername');
+      const newUserPassword = document.getElementById('newUserPassword');
+      const newUserRole = document.getElementById('newUserRole');
+      const newUserCreateBtn = document.getElementById('newUserCreateBtn');
+      const newUserPasswordToggle = document.getElementById('newUserPasswordToggle');
+      const usersTbody = document.getElementById('usersTbody');
+
+      let allOrders = [];
+      let allCategories = [];
+      let allMenuItems = [];
+      let socket = null;
+      let salesChart = null;
+      let statusChart = null;
+      let auth = { token: '', role: '', username: '' };
+      let isLoginPasswordVisible = false;
+      let isPwCurrentVisible = false;
+      let isPwNextVisible = false;
+      let isNewUserPasswordVisible = false;
+
+      function setMsg(text, kind = 'info') {
+        const cls = {
+          info: 'text-slate-500',
+          ok: 'text-emerald-600',
+          error: 'text-rose-600',
+        }[kind] || 'text-slate-500';
+        msgEl.className = `mt-3 text-sm ${cls}`;
+        msgEl.textContent = text;
+      }
+
+      function setConnected(ok) {
+        if (ok) {
+          statusBadge.className = 'inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm text-emerald-700';
+          statusBadge.querySelector('span').className = 'h-2 w-2 rounded-full bg-emerald-500';
+          statusText.textContent = tUi('status.connected');
+        } else {
+          statusBadge.className = 'inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-sm text-rose-700';
+          statusBadge.querySelector('span').className = 'h-2 w-2 rounded-full bg-rose-500';
+          statusText.textContent = tUi('status.disconnected');
+        }
+      }
+
+      function loadAuth() {
+        auth.token = localStorage.getItem('admin_token') || '';
+        auth.role = localStorage.getItem('admin_role') || '';
+        auth.username = localStorage.getItem('admin_username') || '';
+      }
+
+      function saveAuth(next) {
+        auth = { ...auth, ...next };
+        localStorage.setItem('admin_token', auth.token || '');
+        localStorage.setItem('admin_role', auth.role || '');
+        localStorage.setItem('admin_username', auth.username || '');
+      }
+
+      function clearAuth() {
+        auth = { token: '', role: '', username: '' };
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('admin_role');
+        localStorage.removeItem('admin_username');
+      }
+
+      function showLogin() {
+        loginView.classList.remove('hidden');
+        appView.classList.add('hidden');
+        logoutBtn.classList.add('hidden');
+        statusBadge.style.display = 'none';
+        setConnected(false);
+      }
+
+      function showApp() {
+        loginView.classList.add('hidden');
+        appView.classList.remove('hidden');
+        logoutBtn.classList.remove('hidden');
+        statusBadge.style.display = '';
+        superOnlyPanel.classList.toggle('hidden', auth.role !== 'SUPER_ADMIN');
+      }
+
+      function headers() {
+        const token = String(auth.token || '').trim();
+        return {
+          'Content-Type': 'application/json',
+          Authorization: token ? `Bearer ${token}` : '',
+        };
+      }
+
+      function escapeHtml(input) {
+        return String(input)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
+
+      function pickServiceCounterName(counter) {
+        const c = counter || {};
+        const pick = (v) => String(v || '').trim();
+        if (uiLang === 'en') return pick(c.nameEn || c.name_en) || pick(c.nameZh || c.name_zh) || pick(c.nameHant || c.name_hant) || pick(c.name);
+        if (uiLang === 'zh-Hant') return pick(c.nameHant || c.name_hant) || pick(c.nameZh || c.name_zh) || pick(c.nameEn || c.name_en) || pick(c.name);
+        return pick(c.nameZh || c.name_zh) || pick(c.name) || pick(c.nameEn || c.name_en) || pick(c.nameHant || c.name_hant);
+      }
+
+      const HK_OFFSET_MS = 8 * 60 * 60 * 1000;
+
+      function pad2(n) {
+        return String(n).padStart(2, '0');
+      }
+
+      function formatHongKongFromMs(utcMs) {
+        const d = new Date(utcMs + HK_OFFSET_MS);
+        const y = d.getUTCFullYear();
+        const m = pad2(d.getUTCMonth() + 1);
+        const day = pad2(d.getUTCDate());
+        const hh = pad2(d.getUTCHours());
+        const mm = pad2(d.getUTCMinutes());
+        const ss = pad2(d.getUTCSeconds());
+        return `${y}-${m}-${day} ${hh}:${mm}:${ss}`;
+      }
+
+      function formatHongKongFromIso(iso) {
+        if (!iso) return '-';
+        const ms = Date.parse(iso);
+        if (!Number.isFinite(ms)) return '-';
+        return formatHongKongFromMs(ms);
+      }
+
+      function buildOrderStatusFilterOptions() {
+        if (!orderStatusFilter) return;
+        const current = orderStatusFilter.value;
+        const opts = [
+          { value: '', label: tUi('orders.statusAll') },
+          { value: 'pending', label: tUi('orders.statusPending') },
+          { value: 'completed', label: tUi('orders.statusCompleted') },
+        ];
+        orderStatusFilter.innerHTML = opts.map((o) => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join('');
+        if (opts.some((o) => o.value === current)) {
+          orderStatusFilter.value = current;
+        }
+      }
+
+      function computeStatsFromOrders(orders) {
+        const total = orders.length;
+        let pending = 0;
+        let completed = 0;
+
+        for (const o of orders) {
+          if (o.status === 'pending') pending += 1;
+          if (o.status === 'completed') completed += 1;
+        }
+
+        return {
+          total,
+          byStatus: { pending, completed },
+        };
+      }
+
+      function applyStatsToUI(data) {
+        statTotal.textContent = data.total ?? '-';
+        statPending.textContent = data.byStatus?.pending ?? '-';
+        statCompleted.textContent = data.byStatus?.completed ?? '-';
+
+        reportTotal.textContent = data.total ?? '-';
+        reportPending.textContent = data.byStatus?.pending ?? '-';
+        reportCompleted.textContent = data.byStatus?.completed ?? '-';
+        if (reportTime) reportTime.textContent = formatHongKongFromMs(Date.now());
+      }
+
+      function computeSalesTopN(orders, topN = 10) {
+        const counts = new Map();
+
+        for (const o of orders) {
+          if (o.status !== 'completed') continue;
+          const items = Array.isArray(o.items) ? o.items : [];
+          for (const it of items) {
+            const name = String(it.name ?? '').trim();
+            const qty = Number(it.qty ?? 0);
+            if (!name || !Number.isFinite(qty) || qty <= 0) continue;
+            counts.set(name, (counts.get(name) || 0) + qty);
+          }
+        }
+
+        const sorted = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
+        const top = sorted.slice(0, topN);
+        const rest = sorted.slice(topN);
+        const restTotal = rest.reduce((sum, [, v]) => sum + v, 0);
+
+        const labels = top.map(([k]) => k);
+        const values = top.map(([, v]) => v);
+        if (restTotal > 0) {
+          labels.push(tUi('reports.others'));
+          values.push(restTotal);
+        }
+
+        return { labels, values };
+      }
+
+      function initChartsIfNeeded() {
+        if (salesChart == null && salesChartCanvas && window.Chart) {
+          salesChart = new Chart(salesChartCanvas, {
+            type: 'bar',
+            data: {
+              labels: [],
+              datasets: [
+                {
+                  label: tUi('reports.salesDataset'),
+                  data: [],
+                  backgroundColor: '#0f172a',
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { display: false },
+              },
+              scales: {
+                x: { ticks: { color: '#475569' } },
+                y: { ticks: { color: '#475569', precision: 0 } },
+              },
+            },
+          });
+        }
+
+        if (statusChart == null && statusChartCanvas && window.Chart) {
+          statusChart = new Chart(statusChartCanvas, {
+            type: 'doughnut',
+            data: {
+              labels: [tUi('orders.statusPending'), tUi('orders.statusCompleted')],
+              datasets: [
+                {
+                  data: [0, 0],
+                  backgroundColor: ['#f59e0b', '#10b981'],
+                  borderWidth: 0,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { position: 'bottom', labels: { color: '#334155' } },
+              },
+            },
+          });
+        }
+      }
+
+      function updateChartsFromState() {
+        initChartsIfNeeded();
+
+        const stats = computeStatsFromOrders(allOrders);
+        if (statusChart) {
+          statusChart.data.datasets[0].data = [stats.byStatus.pending, stats.byStatus.completed];
+          statusChart.update();
+        }
+
+        if (salesChart) {
+          const sales = computeSalesTopN(allOrders, 10);
+          salesChart.data.labels = sales.labels;
+          salesChart.data.datasets[0].data = sales.values;
+          salesChart.update();
+        }
+      }
+
+      function statusPill(status) {
+        const base = 'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold';
+        if (status === 'completed') {
+          return `<span class="${base} bg-emerald-50 text-emerald-700">${escapeHtml(tUi('orders.pillCompleted'))}</span>`;
+        }
+        return `<span class="${base} bg-amber-50 text-amber-700">${escapeHtml(tUi('orders.pillPending'))}</span>`;
+      }
+
+      async function apiFetch(path, init = {}) {
+        const resp = await fetch(`${apiBase}${path}`, {
+          ...init,
+          headers: { ...headers(), ...(init.headers || {}) },
+        });
+        if (resp.status === 401) {
+          logout();
+        }
+        return resp;
+      }
+
+      async function refreshStats() {
+        try {
+          const resp = await apiFetch('/admin/orders/stats');
+          if (!resp.ok) throw new Error(await resp.text());
+          const data = await resp.json();
+          applyStatsToUI(data);
+
+          setConnected(true);
+        } catch (e) {
+          setConnected(false);
+        }
+      }
+
+      function getFilteredOrdersFromState() {
+        const status = orderStatusFilter.value;
+        if (!status) return allOrders.slice();
+        return allOrders.filter((o) => o.status === status);
+      }
+
+      function upsertOrder(nextOrder) {
+        const idx = allOrders.findIndex((o) => o.id === nextOrder.id);
+        if (idx === -1) {
+          allOrders.unshift(nextOrder);
+        } else {
+          allOrders[idx] = nextOrder;
+        }
+        allOrders.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+      }
+
+      function renderOrdersFromState() {
+        const list = getFilteredOrdersFromState();
+        orderCount.textContent = String(tUi('orders.count')).replace('{n}', String(list.length));
+
+        ordersTbody.innerHTML = list
+          .map((o) => {
+            const items = Array.isArray(o.items) ? o.items : [];
+            const itemsText = escapeHtml(items.map((i) => `${i.name} x${i.qty}`).join(', '));
+            const createdIso = escapeHtml(o.createdAt || '-');
+            const createdHk = escapeHtml(formatHongKongFromIso(o.createdAt));
+            const room = escapeHtml(o.roomId || '-');
+
+            const completeDisabled = o.status === 'completed' ? 'disabled' : '';
+            const completeBtnCls =
+              o.status === 'completed'
+                ? 'cursor-not-allowed bg-slate-100 text-slate-400'
+                : 'bg-emerald-600 text-white hover:bg-emerald-700';
+
+            return `
+              <tr>
+                <td class="px-4 py-3 text-sm">${room}</td>
+                <td class="px-4 py-3 text-sm">${statusPill(o.status)}</td>
+                <td class="px-4 py-3 text-xs text-slate-600"><code title="${createdIso}" class="rounded bg-slate-100 px-1 py-0.5">${createdHk}</code></td>
+                <td class="px-4 py-3 text-sm text-slate-700">${itemsText || '-'}</td>
+                <td class="px-4 py-3 text-sm">
+                  <button data-action="complete" data-id="${o.id}" ${completeDisabled}
+                    class="rounded-lg px-3 py-1.5 text-xs font-medium ${completeBtnCls}">
+                    ${escapeHtml(tUi('orders.btnComplete'))}
+                  </button>
+                </td>
+              </tr>
+            `;
+          })
+          .join('');
+      }
+
+      async function refreshOrders() {
+        try {
+          const resp = await apiFetch('/admin/orders', { method: 'GET' });
+          if (!resp.ok) throw new Error(await resp.text());
+          const orders = await resp.json();
+          allOrders = Array.isArray(orders) ? orders : [];
+          allOrders.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+          renderOrdersFromState();
+          applyStatsToUI(computeStatsFromOrders(allOrders));
+          updateChartsFromState();
+
+          setConnected(true);
+        } catch (e) {
+          setConnected(false);
+          ordersTbody.innerHTML = '';
+          setMsg(`订单拉取失败：${e.message || e}`, 'error');
+        }
+      }
+
+      ordersTbody.addEventListener('click', async (evt) => {
+        const btn = evt.target.closest('button');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+        if (!action || !id) return;
+
+        btn.disabled = true;
+        try {
+          if (action === 'complete') {
+            const resp = await apiFetch(`/admin/orders/${encodeURIComponent(id)}/status`, {
+              method: 'PATCH',
+              body: JSON.stringify({ status: 'completed' }),
+            });
+            if (!resp.ok) throw new Error(await resp.text());
+            setMsg('已更新订单状态。', 'ok');
+          }
+          await refreshAll();
+        } catch (e) {
+          setMsg(`操作失败：${e.message || e}`, 'error');
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      async function refreshMenu() {
+        try {
+          if (!Array.isArray(allCategories) || allCategories.length === 0) {
+            await refreshCategories();
+          }
+          const resp = await apiFetch('/admin/menu', { method: 'GET' });
+          if (!resp.ok) throw new Error(await resp.text());
+          const items = await resp.json();
+          const list = Array.isArray(items) ? items : [];
+          allMenuItems = list;
+
+          menuTbody.innerHTML = list
+            .map((m) => {
+              const pickName = () => {
+                if (uiLang === 'en') return (m.nameEn || m.name_en || m.nameZh || m.name_zh || m.name || '').trim();
+                if (uiLang === 'zh-Hant') return (m.nameHant || m.name_hant || m.nameZh || m.name_zh || m.name || '').trim();
+                return (m.nameZh || m.name_zh || m.name || '').trim();
+              };
+              const shownName = pickName() || (m.name || '');
+              const soldOut = (m.stock ?? 0) <= 0;
+              const soldOutBadge = soldOut
+                ? '<span class="ml-2 rounded-full bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-700">售罄</span>'
+                : '';
+              const shownCategory = categoryLabelByKey(m.category);
+              return `
+                <tr>
+                  <td class="px-4 py-3 text-sm font-medium">
+                    ${escapeHtml(shownName)}${soldOutBadge}
+                  </td>
+                  <td class="px-4 py-3 text-sm">${escapeHtml(shownCategory)}</td>
+                  <td class="px-4 py-3 text-sm">${Number(m.stock ?? 0)}</td>
+                  <td class="px-4 py-3 text-sm">${m.isActive ? escapeHtml(tUi('menu.activeYes')) : escapeHtml(tUi('menu.activeNo'))}</td>
+                  <td class="px-4 py-3 text-sm">
+                    <div class="flex flex-wrap gap-2">
+                      <button
+                        data-action="editMenu"
+                        data-id="${m.id}"
+                        title="${escapeHtml(tUi('actions.edit'))}"
+                        class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white p-2 text-blue-600 hover:bg-blue-50"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 20h9" />
+                          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                        </svg>
+                      </button>
+                      <button data-action="deleteMenu" data-id="${m.id}" class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-700">${escapeHtml(tUi('actions.delete'))}</button>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            })
+            .join('');
+
+          setConnected(true);
+        } catch (e) {
+          setConnected(false);
+          menuTbody.innerHTML = '';
+          setMsg(`商品拉取失败：${e.message || e}`, 'error');
+        }
+      }
+
+      let editLang = 'zh';
+
+      function setEditLang(next) {
+        editLang = next === 'en' ? 'en' : next === 'zh-Hant' ? 'zh-Hant' : 'zh';
+        const activeBtn = 'bg-slate-900 text-white';
+        const idleBtn = 'bg-white text-slate-700 hover:bg-slate-100';
+
+        editLangTabZh.className = `rounded-lg px-3 py-1.5 text-sm font-medium ${editLang === 'zh' ? activeBtn : idleBtn}`;
+        editLangTabEn.className = `rounded-lg px-3 py-1.5 text-sm font-medium ${editLang === 'en' ? activeBtn : idleBtn}`;
+        editLangTabHant.className = `rounded-lg px-3 py-1.5 text-sm font-medium ${editLang === 'zh-Hant' ? activeBtn : idleBtn}`;
+
+        editPaneZh.classList.toggle('hidden', editLang !== 'zh');
+        editPaneEn.classList.toggle('hidden', editLang !== 'en');
+        editPaneHant.classList.toggle('hidden', editLang !== 'zh-Hant');
+      }
+
+      function openMenuEditModal(menuItem) {
+        if (!menuItem) return;
+        editMenuId.value = menuItem.id || '';
+        editMenuName.value = menuItem.name || '';
+        editMenuCategory.value = menuItem.category || '';
+        editMenuStock.value = Number(menuItem.stock ?? 0);
+        editMenuActive.checked = Boolean(menuItem.isActive);
+
+        editMenuNameZh.value = (menuItem.nameZh || menuItem.name_zh || '').trim();
+        editMenuNameEn.value = (menuItem.nameEn || menuItem.name_en || '').trim();
+        editMenuNameHant.value = (menuItem.nameHant || menuItem.name_hant || '').trim();
+        editMenuDescZh.value = (menuItem.descZh || menuItem.desc_zh || '').trim();
+        editMenuDescEn.value = (menuItem.descEn || menuItem.desc_en || '').trim();
+        editMenuDescHant.value = (menuItem.descHant || menuItem.desc_hant || '').trim();
+
+        editMenuImageFile.value = '';
+        const raw = (menuItem.imageUrl || menuItem.image_url || '').trim();
+        editMenuImageUrlText.textContent = raw;
+        if (raw) {
+          editMenuImagePreview.src = raw;
+          editMenuImagePreview.classList.remove('hidden');
+          editMenuImagePlaceholder.classList.add('hidden');
+        } else {
+          editMenuImagePreview.src = '';
+          editMenuImagePreview.classList.add('hidden');
+          editMenuImagePlaceholder.classList.remove('hidden');
+        }
+
+        setEditLang(uiLang);
+        menuEditModal.classList.remove('hidden');
+        menuEditModal.classList.add('flex');
+      }
+
+      function closeMenuEditModal() {
+        menuEditModal.classList.add('hidden');
+        menuEditModal.classList.remove('flex');
+      }
+
+      menuEditClose.addEventListener('click', closeMenuEditModal);
+      menuEditCancelBtn.addEventListener('click', closeMenuEditModal);
+      menuEditModal.addEventListener('click', (evt) => {
+        if (evt.target === menuEditModal) closeMenuEditModal();
+      });
+
+      function openMenuCreateModal() {
+        if (!menuCreateModal) return;
+        if (menuCreateImageFile) menuCreateImageFile.value = '';
+        if (menuCreateImageUrlText) menuCreateImageUrlText.textContent = '';
+        if (menuCreateImagePreview) {
+          menuCreateImagePreview.src = '';
+          menuCreateImagePreview.classList.add('hidden');
+        }
+        if (menuCreateImagePlaceholder) menuCreateImagePlaceholder.classList.remove('hidden');
+        menuCreateModal.classList.remove('hidden');
+        menuCreateModal.classList.add('flex');
+      }
+
+      function closeMenuCreateModal() {
+        if (!menuCreateModal) return;
+        menuCreateModal.classList.add('hidden');
+        menuCreateModal.classList.remove('flex');
+      }
+
+      if (menuOpenCreateModalBtn) {
+        menuOpenCreateModalBtn.addEventListener('click', async () => {
+          try {
+            if (!Array.isArray(allCategories) || allCategories.length === 0) {
+              await refreshCategories();
+            }
+            buildMenuCategorySelectOptions();
+          } catch (_) {
+          }
+          openMenuCreateModal();
+        });
+      }
+
+      if (menuCreateClose) menuCreateClose.addEventListener('click', closeMenuCreateModal);
+      if (menuCreateCancelBtn) menuCreateCancelBtn.addEventListener('click', closeMenuCreateModal);
+      if (menuCreateModal) {
+        menuCreateModal.addEventListener('click', (evt) => {
+          if (evt.target === menuCreateModal) closeMenuCreateModal();
+        });
+      }
+
+      let categoryModalCtx = { afterCreateSelectKey: '', isEdit: false };
+
+      function openCategoryModal({ mode, category, afterCreateSelectKey } = {}) {
+        if (!categoryModal) return;
+        categoryModalCtx = { afterCreateSelectKey: afterCreateSelectKey || '', isEdit: mode === 'edit' };
+        const isEdit = mode === 'edit';
+
+        categoryId.value = isEdit ? String(category?.id || '') : '';
+        categoryKey.value = isEdit ? String(category?.name || '') : '';
+        categoryKey.disabled = isEdit;
+
+        categoryNameZh.value = String(category?.nameZh || category?.name_zh || '').trim();
+        categoryNameEn.value = String(category?.nameEn || category?.name_en || '').trim();
+        categoryNameHant.value = String(category?.nameHant || category?.name_hant || '').trim();
+
+        const url = resolvePublicUrl(category?.imageUrl || category?.image_url || '');
+        categoryImageUrlText.textContent = url;
+        if (url) {
+          categoryImagePreview.src = url;
+          categoryImagePreview.classList.remove('hidden');
+          categoryImagePlaceholder.classList.add('hidden');
+        } else {
+          categoryImagePreview.src = '';
+          categoryImagePreview.classList.add('hidden');
+          categoryImagePlaceholder.classList.remove('hidden');
+        }
+        if (categoryImageFile) categoryImageFile.value = '';
+
+        const title = isEdit ? tUi('categories.editTitle') : tUi('categories.createTitle');
+        const titleEl = document.getElementById('categoryModalTitle');
+        if (titleEl) titleEl.textContent = title;
+
+        categoryModal.classList.remove('hidden');
+        categoryModal.classList.add('flex');
+      }
+
+      function closeCategoryModal() {
+        if (!categoryModal) return;
+        categoryModal.classList.add('hidden');
+        categoryModal.classList.remove('flex');
+      }
+
+      if (categoryClose) categoryClose.addEventListener('click', closeCategoryModal);
+      if (categoryCancelBtn) categoryCancelBtn.addEventListener('click', closeCategoryModal);
+      if (categoryModal) {
+        categoryModal.addEventListener('click', (evt) => {
+          if (evt.target === categoryModal) closeCategoryModal();
+        });
+      }
+
+      if (categoryImageFile) {
+        categoryImageFile.addEventListener('change', () => {
+          const file = categoryImageFile.files && categoryImageFile.files[0];
+          if (!file) return;
+          const url = URL.createObjectURL(file);
+          categoryImagePreview.src = url;
+          categoryImagePreview.classList.remove('hidden');
+          categoryImagePlaceholder.classList.add('hidden');
+        });
+      }
+
+      if (categoriesAddBtn) {
+        categoriesAddBtn.addEventListener('click', () => openCategoryModal({ mode: 'create' }));
+      }
+      if (categoriesPageRefreshBtn) {
+        categoriesPageRefreshBtn.addEventListener('click', async () => {
+          categoriesPageRefreshBtn.disabled = true;
+          try {
+            await refreshCategories();
+            setMsg('已刷新分类。', 'ok');
+          } catch (e) {
+            setMsg(`刷新失败：${e.message || e}`, 'error');
+          } finally {
+            categoriesPageRefreshBtn.disabled = false;
+          }
+        });
+      }
+      if (categoriesTbody) {
+        categoriesTbody.addEventListener('click', (evt) => {
+          const btn = evt.target.closest('button');
+          if (!btn) return;
+          if (btn.dataset.action !== 'editCategory') return;
+          const id = btn.dataset.id;
+          const cat = (Array.isArray(allCategories) ? allCategories : []).find((x) => String(x.id) === String(id));
+          if (!cat) return;
+          openCategoryModal({ mode: 'edit', category: cat });
+        });
+      }
+
+      if (menuCategoryAddBtn) {
+        menuCategoryAddBtn.addEventListener('click', () => openCategoryModal({ mode: 'create', afterCreateSelectKey: 'menuCategory' }));
+      }
+
+      if (categorySaveBtn) {
+        categorySaveBtn.addEventListener('click', async () => {
+          categorySaveBtn.disabled = true;
+          try {
+            const isEdit = categoryModalCtx.isEdit;
+            const id = String(categoryId.value || '').trim();
+            const key = String(categoryKey.value || '').trim();
+            if (!isEdit && !key) {
+              setMsg('分类 key 不能为空。', 'error');
+              return;
+            }
+
+            const payload = {
+              name: key,
+              nameZh: String(categoryNameZh.value || '').trim() || null,
+              nameEn: String(categoryNameEn.value || '').trim() || null,
+              nameHant: String(categoryNameHant.value || '').trim() || null,
+            };
+
+            let saved;
+            if (isEdit) {
+              const resp = await apiFetch(`/admin/categories/${encodeURIComponent(id)}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ nameZh: payload.nameZh, nameEn: payload.nameEn, nameHant: payload.nameHant }),
+              });
+              if (!resp.ok) throw new Error(await resp.text());
+              saved = await resp.json();
+            } else {
+              const resp = await apiFetch('/admin/categories', { method: 'POST', body: JSON.stringify(payload) });
+              if (!resp.ok) throw new Error(await resp.text());
+              saved = await resp.json();
+            }
+
+            const file = categoryImageFile && categoryImageFile.files && categoryImageFile.files[0];
+            if (file) {
+              const dataUrl = await readFileAsDataUrl(file);
+              const imgResp = await apiFetch(`/admin/categories/${encodeURIComponent(saved.id)}/image`, {
+                method: 'POST',
+                body: JSON.stringify({ dataUrl }),
+              });
+              if (!imgResp.ok) throw new Error(await imgResp.text());
+            }
+
+            await refreshCategories();
+            await refreshMenu();
+            setMsg('已保存分类。', 'ok');
+
+            if (!isEdit && categoryModalCtx.afterCreateSelectKey === 'menuCategory') {
+              buildMenuCategorySelectOptions(String(saved.name || '').trim());
+            }
+
+            closeCategoryModal();
+          } catch (e) {
+            setMsg(`保存失败：${e.message || e}`, 'error');
+          } finally {
+            categorySaveBtn.disabled = false;
+          }
+        });
+      }
+
+      editLangTabZh.addEventListener('click', () => setEditLang('zh'));
+      editLangTabEn.addEventListener('click', () => setEditLang('en'));
+      editLangTabHant.addEventListener('click', () => setEditLang('zh-Hant'));
+
+      editMenuImageFile.addEventListener('change', () => {
+        const file = editMenuImageFile.files && editMenuImageFile.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        editMenuImagePreview.src = url;
+        editMenuImagePreview.classList.remove('hidden');
+        editMenuImagePlaceholder.classList.add('hidden');
+      });
+
+      if (menuCreateImageFile) {
+        menuCreateImageFile.addEventListener('change', () => {
+          const file = menuCreateImageFile.files && menuCreateImageFile.files[0];
+          if (!file) return;
+          const url = URL.createObjectURL(file);
+          menuCreateImagePreview.src = url;
+          menuCreateImagePreview.classList.remove('hidden');
+          menuCreateImagePlaceholder.classList.add('hidden');
+        });
+      }
+
+      function readFileAsDataUrl(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result || ''));
+          reader.onerror = () => reject(new Error('Failed to read file'));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      menuEditSaveBtn.addEventListener('click', async () => {
+        const id = (editMenuId.value || '').trim();
+        if (!id) return;
+        menuEditSaveBtn.disabled = true;
+        try {
+          const payload = {
+            category: editMenuCategory.value.trim(),
+            stock: Number(editMenuStock.value || 0),
+            isActive: Boolean(editMenuActive.checked),
+            nameZh: editMenuNameZh.value.trim(),
+            nameEn: editMenuNameEn.value.trim(),
+            nameHant: editMenuNameHant.value.trim(),
+            descZh: editMenuDescZh.value.trim(),
+            descEn: editMenuDescEn.value.trim(),
+            descHant: editMenuDescHant.value.trim(),
+          };
+          const resp = await apiFetch(`/admin/menu/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(payload) });
+          if (!resp.ok) throw new Error(await resp.text());
+
+          const file = editMenuImageFile.files && editMenuImageFile.files[0];
+          if (file) {
+            const dataUrl = await readFileAsDataUrl(file);
+            const imgResp = await apiFetch(`/admin/menu/${encodeURIComponent(id)}/image`, {
+              method: 'POST',
+              body: JSON.stringify({ dataUrl }),
+            });
+            if (!imgResp.ok) throw new Error(await imgResp.text());
+          }
+
+          setMsg('已保存商品变更。', 'ok');
+          closeMenuEditModal();
+          await refreshMenu();
+        } catch (e) {
+          setMsg(`保存失败：${e.message || e}`, 'error');
+        } finally {
+          menuEditSaveBtn.disabled = false;
+        }
+      });
+
+      menuTbody.addEventListener('click', async (evt) => {
+        const btn = evt.target.closest('button');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+        if (!action || !id) return;
+
+        btn.disabled = true;
+        try {
+          if (action === 'editMenu') {
+            const menuItem = (allMenuItems || []).find((x) => String(x.id) === String(id));
+            openMenuEditModal(menuItem);
+            return;
+          }
+          if (action === 'deleteMenu') {
+            if (!confirm('确认删除该商品？')) return;
+            const resp = await apiFetch(`/admin/menu/${encodeURIComponent(id)}`, { method: 'DELETE' });
+            if (!resp.ok && resp.status !== 204) throw new Error(await resp.text());
+            setMsg('已删除商品。', 'ok');
+          }
+          await refreshMenu();
+        } catch (e) {
+          setMsg(`操作失败：${e.message || e}`, 'error');
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      menuCreateBtn.addEventListener('click', async () => {
+        menuCreateBtn.disabled = true;
+        try {
+          const name = menuName.value.trim();
+          const category = menuCategory.value.trim();
+          if (!name) {
+            setMsg('名称不能为空。', 'error');
+            return;
+          }
+          if (!category) {
+            setMsg('请选择分类。', 'error');
+            return;
+          }
+          const payload = {
+            name,
+            category,
+            stock: Number(menuStock.value || 0),
+            isActive: Boolean(menuActive.checked),
+            nameZh: menuNameZh.value.trim(),
+            nameEn: menuNameEn.value.trim(),
+            nameHant: menuNameHant.value.trim(),
+            descZh: menuDescZh.value.trim(),
+            descEn: menuDescEn.value.trim(),
+            descHant: menuDescHant.value.trim(),
+          };
+          const resp = await apiFetch('/admin/menu', { method: 'POST', body: JSON.stringify(payload) });
+          if (!resp.ok) throw new Error(await resp.text());
+          const created = await resp.json();
+          const id = String(created?.id || '').trim();
+          const file = menuCreateImageFile && menuCreateImageFile.files && menuCreateImageFile.files[0];
+          if (file && id) {
+            const dataUrl = await readFileAsDataUrl(file);
+            const imgResp = await apiFetch(`/admin/menu/${encodeURIComponent(id)}/image`, {
+              method: 'POST',
+              body: JSON.stringify({ dataUrl }),
+            });
+            if (!imgResp.ok) throw new Error(await imgResp.text());
+          }
+          menuName.value = '';
+          menuCategory.value = '';
+          menuStock.value = '';
+          menuActive.checked = true;
+          menuNameZh.value = '';
+          menuNameEn.value = '';
+          menuNameHant.value = '';
+          menuDescZh.value = '';
+          menuDescEn.value = '';
+          menuDescHant.value = '';
+          if (menuCreateImageFile) menuCreateImageFile.value = '';
+          if (menuCreateImageUrlText) menuCreateImageUrlText.textContent = '';
+          if (menuCreateImagePreview) {
+            menuCreateImagePreview.src = '';
+            menuCreateImagePreview.classList.add('hidden');
+          }
+          if (menuCreateImagePlaceholder) menuCreateImagePlaceholder.classList.remove('hidden');
+          setMsg('已创建商品。', 'ok');
+          closeMenuCreateModal();
+          await refreshMenu();
+        } catch (e) {
+          setMsg(`创建失败：${e.message || e}`, 'error');
+        } finally {
+          menuCreateBtn.disabled = false;
+        }
+      });
+
+      function renderCreateCounterCategoryList() {
+        const list = Array.isArray(allCategories) ? allCategories : [];
+        if (!list.length) {
+          counterCategoryList.innerHTML = '<div class="text-xs text-slate-500">暂无分类。请先在“商品管理”里新增带分类的商品，系统会自动生成分类。</div>';
+          return;
+        }
+
+        counterCategoryList.innerHTML = list
+          .map((cat) => {
+            const assigned = cat.serviceCounter ? `（已分配：${escapeHtml(pickServiceCounterName(cat.serviceCounter))}）` : '';
+            const shownName = escapeHtml(pickCategoryName(cat));
+            return `
+              <label class="flex items-center justify-between gap-3 rounded-md px-2 py-1 hover:bg-slate-50">
+                <span class="flex items-center gap-2">
+                  <input type="checkbox" data-field="createCategory" data-category-id="${cat.id}" class="h-4 w-4 rounded border-slate-300" />
+                  <span class="text-sm text-slate-700">${shownName}</span>
+                </span>
+                <span class="text-xs text-slate-500">${assigned}</span>
+              </label>
+            `;
+          })
+          .join('');
+      }
+
+      function pickCategoryName(category) {
+        const c = category || {};
+        const pick = (v) => String(v || '').trim();
+        const base = pick(c.name);
+        const zh = pick(c.nameZh || c.name_zh);
+        const en = pick(c.nameEn || c.name_en);
+        const hant = pick(c.nameHant || c.name_hant);
+        if (uiLang === 'en') return en || zh || hant || base;
+        if (uiLang === 'zh-Hant') return hant || zh || en || base;
+        return zh || base || en || hant;
+      }
+
+      function resolvePublicUrl(url) {
+        const u = String(url || '').trim();
+        if (!u) return '';
+        if (u.startsWith('http://') || u.startsWith('https://')) return u;
+        if (u.startsWith('/')) return u;
+        return `/${u}`;
+      }
+
+      function buildMenuCategorySelectOptions(nextSelected) {
+        if (!menuCategory) return;
+        const selected = typeof nextSelected === 'string' ? nextSelected : menuCategory.value;
+        const list = Array.isArray(allCategories) ? allCategories : [];
+        const opt0 = { value: '', label: tUi('menu.categorySelectPh') };
+        const opts = [
+          opt0,
+          ...list.map((c) => ({
+            value: String(c.name || '').trim(),
+            label: pickCategoryName(c),
+          })),
+        ].filter((o) => o.value || o === opt0);
+
+        menuCategory.innerHTML = opts.map((o) => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join('');
+        const ok = opts.some((o) => o.value === selected);
+        menuCategory.value = ok ? selected : '';
+      }
+
+      function renderCategoriesPageList() {
+        if (!categoriesTbody) return;
+        const list = Array.isArray(allCategories) ? allCategories : [];
+        categoriesTbody.innerHTML = list
+          .map((c) => {
+            const id = escapeHtml(c.id || '');
+            const key = escapeHtml(c.name || '');
+            const zh = escapeHtml(c.nameZh || c.name_zh || '');
+            const en = escapeHtml(c.nameEn || c.name_en || '');
+            const hant = escapeHtml(c.nameHant || c.name_hant || '');
+            const imageUrl = resolvePublicUrl(c.imageUrl || c.image_url || '');
+            const iconCell = imageUrl
+              ? `<img src="${escapeHtml(imageUrl)}" class="h-8 w-8 object-contain" alt="icon" />`
+              : `<div class="h-8 w-8 rounded-lg bg-slate-100"></div>`;
+            return `
+              <tr>
+                <td class="px-4 py-3 text-sm">${iconCell}</td>
+                <td class="px-4 py-3 text-sm font-medium">${key}</td>
+                <td class="px-4 py-3 text-sm">${zh}</td>
+                <td class="px-4 py-3 text-sm">${en}</td>
+                <td class="px-4 py-3 text-sm">${hant}</td>
+                <td class="px-4 py-3 text-sm">
+                  <button data-action="editCategory" data-id="${id}" class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium hover:bg-slate-50">${escapeHtml(tUi('actions.edit'))}</button>
+                </td>
+              </tr>
+            `;
+          })
+          .join('');
+      }
+
+      function categoryLabelByKey(key) {
+        const k = String(key || '').trim();
+        if (!k) return '';
+        const list = Array.isArray(allCategories) ? allCategories : [];
+        const found = list.find((c) => String(c?.name || '').trim() === k);
+        return found ? pickCategoryName(found) : k;
+      }
+
+      function renderCategoryI18nList() {
+        if (!categoryI18nList) return;
+        const list = Array.isArray(allCategories) ? allCategories : [];
+        if (!list.length) {
+          categoryI18nList.innerHTML = '<div class="text-xs text-slate-500">暂无分类。</div>';
+          return;
+        }
+
+        categoryI18nList.innerHTML = list
+          .map((cat) => {
+            const id = escapeHtml(cat.id || '');
+            const key = escapeHtml(cat.name || '');
+            const zh = escapeHtml(cat.nameZh || cat.name_zh || '');
+            const en = escapeHtml(cat.nameEn || cat.name_en || '');
+            const hant = escapeHtml(cat.nameHant || cat.name_hant || '');
+            return `
+              <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <div class="text-xs font-semibold text-slate-700">${key}</div>
+                <div class="mt-2 grid grid-cols-1 gap-2">
+                  <input data-field="catNameZh" data-id="${id}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" value="${zh}" placeholder="${escapeHtml(tUi('categories.zhPh'))}" />
+                  <input data-field="catNameEn" data-id="${id}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" value="${en}" placeholder="${escapeHtml(tUi('categories.enPh'))}" />
+                  <input data-field="catNameHant" data-id="${id}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" value="${hant}" placeholder="${escapeHtml(tUi('categories.hantPh'))}" />
+                </div>
+                <div class="mt-2 flex justify-end">
+                  <button data-action="saveCategoryI18n" data-id="${id}" class="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800">${escapeHtml(tUi('actions.save'))}</button>
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+      }
+
+      async function refreshCategories() {
+        try {
+          const resp = await apiFetch('/admin/categories', { method: 'GET' });
+          if (!resp.ok) throw new Error(await resp.text());
+          const list = await resp.json();
+          allCategories = Array.isArray(list) ? list : [];
+          renderCreateCounterCategoryList();
+          renderCategoryI18nList();
+          renderCategoriesPageList();
+          buildMenuCategorySelectOptions();
+          setConnected(true);
+        } catch (e) {
+          allCategories = [];
+          renderCreateCounterCategoryList();
+          renderCategoryI18nList();
+          renderCategoriesPageList();
+          buildMenuCategorySelectOptions();
+          setConnected(false);
+        }
+      }
+
+      if (categoriesRefreshBtn) {
+        categoriesRefreshBtn.addEventListener('click', async () => {
+          categoriesRefreshBtn.disabled = true;
+          try {
+            await refreshCategories();
+            setMsg('已刷新分类。', 'ok');
+          } catch (e) {
+            setMsg(`刷新失败：${e.message || e}`, 'error');
+          } finally {
+            categoriesRefreshBtn.disabled = false;
+          }
+        });
+      }
+
+      if (categoryI18nList) {
+        categoryI18nList.addEventListener('click', async (evt) => {
+          const btn = evt.target.closest('button');
+          if (!btn) return;
+          if (btn.dataset.action !== 'saveCategoryI18n') return;
+          const id = btn.dataset.id;
+          if (!id) return;
+          btn.disabled = true;
+          try {
+            const zhInput = categoryI18nList.querySelector(`input[data-field="catNameZh"][data-id="${CSS.escape(id)}"]`);
+            const enInput = categoryI18nList.querySelector(`input[data-field="catNameEn"][data-id="${CSS.escape(id)}"]`);
+            const hantInput = categoryI18nList.querySelector(`input[data-field="catNameHant"][data-id="${CSS.escape(id)}"]`);
+            const nameZh = String(zhInput?.value || '').trim();
+            const nameEn = String(enInput?.value || '').trim();
+            const nameHant = String(hantInput?.value || '').trim();
+
+            const resp = await apiFetch(`/admin/categories/${encodeURIComponent(id)}`, {
+              method: 'PATCH',
+              body: JSON.stringify({ nameZh: nameZh || null, nameEn: nameEn || null, nameHant: nameHant || null }),
+            });
+            if (!resp.ok) throw new Error(await resp.text());
+            setMsg('已保存分类多语言。', 'ok');
+            await refreshCategories();
+            await refreshMenu();
+          } catch (e) {
+            setMsg(`保存失败：${e.message || e}`, 'error');
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      }
+
+      function findCategoryConflicts(selectedIds, currentCounterId) {
+        const selected = new Set(selectedIds || []);
+        const conflicts = [];
+        for (const c of allCategories) {
+          if (!selected.has(c.id)) continue;
+          if (c.serviceCounterId && c.serviceCounterId !== currentCounterId) {
+            conflicts.push(c);
+          }
+        }
+        return conflicts;
+      }
+
+      function formatConflictsForConfirm(conflicts) {
+        return conflicts
+          .map((c) => {
+            const from = c.serviceCounter ? pickServiceCounterName(c.serviceCounter) : c.serviceCounterId || '未知柜台';
+            return `${c.name} ← ${from}`;
+          })
+          .join('\n');
+      }
+
+      async function refreshServiceCounters() {
+        try {
+          const resp = await apiFetch('/admin/service-counters', { method: 'GET' });
+          if (!resp.ok) throw new Error(await resp.text());
+          const counters = await resp.json();
+          const list = Array.isArray(counters) ? counters : [];
+
+          countersTbody.innerHTML = list
+            .map((c) => {
+              const safeName = escapeHtml(c.name || '');
+              const safeNameZh = escapeHtml(c.nameZh || c.name_zh || '');
+              const safeNameEn = escapeHtml(c.nameEn || c.name_en || '');
+              const safeNameHant = escapeHtml(c.nameHant || c.name_hant || '');
+              const cats = Array.isArray(c.categories) ? c.categories : [];
+              const catsText = cats.length ? escapeHtml(cats.map((x) => pickCategoryName(x)).join(', ')) : '<span class="text-xs text-slate-400">-</span>';
+              const all = Array.isArray(allCategories) ? allCategories : [];
+              const catPicker =
+                all.length === 0
+                  ? '<div class="text-xs text-slate-400">暂无分类</div>'
+                  : `
+                    <details class="mt-2">
+                      <summary class="cursor-pointer text-xs text-slate-600 hover:text-slate-800">${escapeHtml(tUi('actions.editCats'))}</summary>
+                      <div class="mt-2 max-h-56 overflow-auto rounded-lg border border-slate-200 bg-white p-2">
+                        ${all
+                          .map((cat) => {
+                            const checked = cat.serviceCounterId === c.id ? 'checked' : '';
+                            const assigned =
+                              cat.serviceCounterId && cat.serviceCounterId !== c.id && cat.serviceCounter
+                                ? `（已分配：${escapeHtml(pickServiceCounterName(cat.serviceCounter))}）`
+                                : '';
+                            return `
+                              <label class="flex items-center justify-between gap-3 rounded-md px-2 py-1 hover:bg-slate-50">
+                                <span class="flex items-center gap-2">
+                                  <input type="checkbox" data-field="counterCategory" data-counter-id="${c.id}" data-category-id="${cat.id}" class="h-4 w-4 rounded border-slate-300" ${checked} />
+                                  <span class="text-sm text-slate-700">${escapeHtml(pickCategoryName(cat))}</span>
+                                </span>
+                                <span class="text-xs text-slate-500">${assigned}</span>
+                              </label>
+                            `;
+                          })
+                          .join('')}
+                      </div>
+                    </details>
+                  `;
+              return `
+                <tr>
+                  <td class="px-4 py-3 text-sm">
+                    <div class="space-y-2">
+                      <input data-field="name" data-id="${c.id}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" value="${safeName}" />
+                      <details>
+                        <summary class="cursor-pointer text-xs text-slate-600 hover:text-slate-800">${escapeHtml(tUi('counters.i18nSummary'))}</summary>
+                        <div class="mt-2 space-y-2 rounded-lg border border-slate-200 bg-white p-3">
+                          <input data-field="nameZh" data-id="${c.id}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" value="${safeNameZh}" placeholder="${escapeHtml(tUi('counters.nameZhPh'))}" />
+                          <input data-field="nameEn" data-id="${c.id}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" value="${safeNameEn}" placeholder="${escapeHtml(tUi('counters.nameEnPh'))}" />
+                          <input data-field="nameHant" data-id="${c.id}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm" value="${safeNameHant}" placeholder="${escapeHtml(tUi('counters.nameHantPh'))}" />
+                        </div>
+                      </details>
+                      <div class="text-xs text-slate-500">${escapeHtml(pickServiceCounterName(c) || c.name || '')}</div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 text-sm">
+                    <div class="text-xs text-slate-600">${catsText}</div>
+                    ${catPicker}
+                  </td>
+                  <td class="px-4 py-3 text-sm">
+                    <div class="flex flex-wrap gap-2">
+                      <button data-action="saveCounter" data-id="${c.id}" class="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800">${escapeHtml(tUi('actions.save'))}</button>
+                      <button data-action="deleteCounter" data-id="${c.id}" class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-700">${escapeHtml(tUi('actions.delete'))}</button>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            })
+            .join('');
+
+          setConnected(true);
+        } catch (e) {
+          setConnected(false);
+          countersTbody.innerHTML = '';
+          setMsg(`柜台拉取失败：${e.message || e}`, 'error');
+        }
+      }
+
+      countersTbody.addEventListener('click', async (evt) => {
+        const btn = evt.target.closest('button');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+        if (!action || !id) return;
+
+        btn.disabled = true;
+        try {
+          if (action === 'saveCounter') {
+            const nameInput = countersTbody.querySelector(`input[data-field="name"][data-id="${CSS.escape(id)}"]`);
+            const nameVal = String(nameInput?.value || '').trim();
+            const nameZhInput = countersTbody.querySelector(`input[data-field="nameZh"][data-id="${CSS.escape(id)}"]`);
+            const nameEnInput = countersTbody.querySelector(`input[data-field="nameEn"][data-id="${CSS.escape(id)}"]`);
+            const nameHantInput = countersTbody.querySelector(`input[data-field="nameHant"][data-id="${CSS.escape(id)}"]`);
+            const nameZhVal = String(nameZhInput?.value || '').trim();
+            const nameEnVal = String(nameEnInput?.value || '').trim();
+            const nameHantVal = String(nameHantInput?.value || '').trim();
+            const selectedIds = Array.from(
+              countersTbody.querySelectorAll(`input[data-field="counterCategory"][data-counter-id="${CSS.escape(id)}"]:checked`),
+            ).map((el) => el.dataset.categoryId);
+
+            const conflicts = findCategoryConflicts(selectedIds, id);
+            if (conflicts.length) {
+              const list = formatConflictsForConfirm(conflicts);
+              const ok = confirm(`以下分类已分配给其他柜台：\n${list}\n\n继续将自动转移到当前柜台，是否继续？`);
+              if (!ok) return;
+            }
+
+            const resp = await apiFetch(`/admin/service-counters/${encodeURIComponent(id)}`, {
+              method: 'PATCH',
+              body: JSON.stringify({
+                name: nameVal,
+                nameZh: nameZhVal || null,
+                nameEn: nameEnVal || null,
+                nameHant: nameHantVal || null,
+                categoryIds: selectedIds,
+              }),
+            });
+            if (!resp.ok) throw new Error(await resp.text());
+            const data = await resp.json();
+            const reassigned = Array.isArray(data?.reassigned) ? data.reassigned : [];
+            if (reassigned.length) {
+              setMsg(`已保存柜台变更，并自动转移 ${reassigned.length} 个分类。`, 'ok');
+            } else {
+              setMsg('已保存柜台变更。', 'ok');
+            }
+          }
+          if (action === 'deleteCounter') {
+            if (!confirm('确认删除该柜台？相关商品将自动解绑到“无柜台”。')) return;
+            const resp = await apiFetch(`/admin/service-counters/${encodeURIComponent(id)}`, { method: 'DELETE' });
+            if (!resp.ok && resp.status !== 204) throw new Error(await resp.text());
+            setMsg('已删除柜台。', 'ok');
+          }
+          await refreshCategories();
+          await refreshServiceCounters();
+        } catch (e) {
+          setMsg(`操作失败：${e.message || e}`, 'error');
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      counterCreateBtn.addEventListener('click', async () => {
+        counterCreateBtn.disabled = true;
+        try {
+          const nameVal = String(counterName.value || '').trim();
+          const nameZhVal = String(counterNameZh?.value || '').trim();
+          const nameEnVal = String(counterNameEn?.value || '').trim();
+          const nameHantVal = String(counterNameHant?.value || '').trim();
+          const selectedIds = Array.from(counterCategoryList.querySelectorAll('input[data-field="createCategory"]:checked')).map(
+            (el) => el.dataset.categoryId,
+          );
+
+          const conflicts = findCategoryConflicts(selectedIds, '');
+          if (conflicts.length) {
+            const list = formatConflictsForConfirm(conflicts);
+            const ok = confirm(`以下分类已分配给其他柜台：\n${list}\n\n继续将自动转移到新柜台，是否继续？`);
+            if (!ok) return;
+          }
+
+          const hasAnyI18n = Boolean(nameZhVal || nameEnVal || nameHantVal);
+          const payload = {
+            name: nameVal,
+            nameZh: hasAnyI18n ? (nameZhVal || nameVal) : nameVal,
+            nameEn: hasAnyI18n ? (nameEnVal || nameVal) : nameVal,
+            nameHant: hasAnyI18n ? (nameHantVal || nameVal) : nameVal,
+            categoryIds: selectedIds,
+          };
+          const resp = await apiFetch('/admin/service-counters', { method: 'POST', body: JSON.stringify(payload) });
+          if (!resp.ok) throw new Error(await resp.text());
+          try {
+            const data = await resp.json();
+            const reassigned = Array.isArray(data?.reassigned) ? data.reassigned : [];
+            if (reassigned.length) {
+              setMsg(`已创建柜台，并自动转移 ${reassigned.length} 个分类。`, 'ok');
+            } else {
+              setMsg('已创建柜台。', 'ok');
+            }
+          } catch (_) {
+            setMsg('已创建柜台。', 'ok');
+          }
+          counterName.value = '';
+          if (counterNameZh) counterNameZh.value = '';
+          if (counterNameEn) counterNameEn.value = '';
+          if (counterNameHant) counterNameHant.value = '';
+          counterCategoryList.querySelectorAll('input[data-field="createCategory"]').forEach((el) => {
+            el.checked = false;
+          });
+          await refreshCategories();
+          await refreshServiceCounters();
+        } catch (e) {
+          setMsg(`创建失败：${e.message || e}`, 'error');
+        } finally {
+          counterCreateBtn.disabled = false;
+        }
+      });
+
+      async function refreshRooms() {
+        try {
+          const resp = await apiFetch('/admin/rooms', { method: 'GET' });
+          if (!resp.ok) throw new Error(await resp.text());
+          const rooms = await resp.json();
+          const list = Array.isArray(rooms) ? rooms : [];
+
+          roomsTbody.innerHTML = list
+            .map((r) => {
+              return `
+                <tr>
+                  <td class="px-4 py-3 text-sm font-medium">${escapeHtml(r.name)}</td>
+                  <td class="px-4 py-3 text-xs text-slate-600"><code class="rounded bg-slate-100 px-1 py-0.5">${escapeHtml(r.code)}</code></td>
+                  <td class="px-4 py-3 text-sm">
+                    <button data-action="deleteRoom" data-id="${r.id}" class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-700">${escapeHtml(tUi('actions.delete'))}</button>
+                  </td>
+                </tr>
+              `;
+            })
+            .join('');
+
+          setConnected(true);
+        } catch (e) {
+          setConnected(false);
+          roomsTbody.innerHTML = '';
+          setMsg(`房间拉取失败：${e.message || e}`, 'error');
+        }
+      }
+
+      roomsTbody.addEventListener('click', async (evt) => {
+        const btn = evt.target.closest('button');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+        if (action !== 'deleteRoom' || !id) return;
+
+        btn.disabled = true;
+        try {
+          if (!confirm('确认删除该房间？')) return;
+          const resp = await apiFetch(`/admin/rooms/${encodeURIComponent(id)}`, { method: 'DELETE' });
+          if (!resp.ok && resp.status !== 204) throw new Error(await resp.text());
+          setMsg('已删除房间。', 'ok');
+          await refreshRooms();
+        } catch (e) {
+          setMsg(`删除失败：${e.message || e}`, 'error');
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      roomCreateBtn.addEventListener('click', async () => {
+        roomCreateBtn.disabled = true;
+        try {
+          const payload = {
+            name: roomName.value.trim(),
+            code: roomCode.value.trim() || undefined,
+          };
+          const resp = await apiFetch('/admin/rooms', { method: 'POST', body: JSON.stringify(payload) });
+          if (!resp.ok) throw new Error(await resp.text());
+          roomName.value = '';
+          roomCode.value = '';
+          setMsg('已创建房间。', 'ok');
+          await refreshRooms();
+        } catch (e) {
+          setMsg(`创建失败：${e.message || e}`, 'error');
+        } finally {
+          roomCreateBtn.disabled = false;
+        }
+      });
+
+      async function refreshAll() {
+        await refreshOrders();
+      }
+
+      function disconnectSocket() {
+        if (socket) {
+          socket.disconnect();
+          socket = null;
+        }
+      }
+
+      function connectSocket() {
+        disconnectSocket();
+
+        const token = String(auth.token || '').trim();
+        if (!token) {
+          setConnected(false);
+          setMsg('请先登录，再启用实时同步。', 'info');
+          return;
+        }
+
+        if (!window.io) {
+          setMsg('Socket.io 客户端未加载，已退化为手动刷新。', 'error');
+          return;
+        }
+
+        socket = window.io({
+          path: '/socket.io',
+          transports: ['websocket'],
+          auth: { token },
+        });
+
+        socket.on('connect', async () => {
+          setConnected(true);
+          setMsg('已连接 Socket，订单秒级同步开启。', 'ok');
+          await refreshAll();
+        });
+
+        socket.on('disconnect', () => {
+          setConnected(false);
+          setMsg('Socket 已断开，正在等待重连…', 'error');
+        });
+
+        socket.on('connect_error', (err) => {
+          setConnected(false);
+          setMsg(`Socket 连接失败：${err && err.message ? err.message : err}`, 'error');
+        });
+
+        const onIncoming = (data) => {
+          if (!data || !data.id) return;
+          upsertOrder(data);
+          renderOrdersFromState();
+          applyStatsToUI(computeStatsFromOrders(allOrders));
+          updateChartsFromState();
+        };
+
+        socket.on('new_order', onIncoming);
+        socket.on('newOrder', onIncoming);
+        socket.on('order_updated', onIncoming);
+        socket.on('orderUpdated', onIncoming);
+      }
+
+      function setTab(active) {
+        for (const t of tabIds) {
+          const el = document.getElementById(`tab_${t}`);
+          if (el) el.classList.toggle('hidden', t !== active);
+        }
+        for (const btn of tabButtons) {
+          const isActive = btn.dataset.tab === active;
+          btn.className = isActive
+            ? 'tabBtn rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white'
+            : 'tabBtn rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50';
+        }
+      }
+
+      tabButtons.forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const next = btn.dataset.tab;
+          if (!next) return;
+          setTab(next);
+          if (next === 'menu') await refreshMenu();
+          if (next === 'categories') await refreshCategories();
+          if (next === 'counters') {
+            await refreshCategories();
+            await refreshServiceCounters();
+          }
+          if (next === 'rooms') await refreshRooms();
+          if (next === 'reports') await refreshStats();
+          if (next === 'settings') await refreshSettings();
+        });
+      });
+
+      globalRefreshBtn.addEventListener('click', async () => {
+        globalRefreshBtn.disabled = true;
+        try {
+          await refreshAll();
+          await refreshMenu();
+          await refreshCategories();
+          await refreshServiceCounters();
+          await refreshRooms();
+          setMsg('已刷新。', 'ok');
+        } catch (e) {
+          setMsg(`刷新失败：${e.message || e}`, 'error');
+        } finally {
+          globalRefreshBtn.disabled = false;
+        }
+      });
+
+      orderStatusFilter.addEventListener('change', renderOrdersFromState);
+      menuRefreshBtn.addEventListener('click', refreshMenu);
+      countersRefreshBtn.addEventListener('click', async () => {
+        await refreshCategories();
+        await refreshServiceCounters();
+      });
+      roomsRefreshBtn.addEventListener('click', refreshRooms);
+      reportsRefreshBtn.addEventListener('click', refreshStats);
+      logoutBtn.addEventListener('click', logout);
+
+      loginBtn.addEventListener('click', login);
+      loginPassword.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') login();
+      });
+      loginPwToggle.addEventListener('click', () => {
+        setLoginPasswordVisible(!isLoginPasswordVisible);
+      });
+      pwCurrentToggle.addEventListener('click', () => {
+        setPwCurrentVisible(!isPwCurrentVisible);
+      });
+      pwNextToggle.addEventListener('click', () => {
+        setPwNextVisible(!isPwNextVisible);
+      });
+      newUserPasswordToggle.addEventListener('click', () => {
+        setNewUserPasswordVisible(!isNewUserPasswordVisible);
+      });
+
+      pwUpdateBtn.addEventListener('click', updateMyPassword);
+      apiKeyLoadBtn.addEventListener('click', loadApiKeyIntoInput);
+      apiKeySaveBtn.addEventListener('click', saveApiKeyFromInput);
+      apiKeyResetBtn.addEventListener('click', resetApiKey);
+      newUserCreateBtn.addEventListener('click', createUserFromInput);
+
+      usersTbody.addEventListener('click', onUsersTableClick);
+      usersTbody.addEventListener('change', onUsersTableChange);
+
+      async function login() {
+        loginBtn.disabled = true;
+        try {
+          const username = loginUsername.value.trim();
+          const password = loginPassword.value;
+          const resp = await fetch(`${apiBase}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+          });
+          if (!resp.ok) throw new Error(await resp.text());
+          const data = await resp.json();
+          saveAuth({ token: data.token, role: data.user?.role || '', username: data.user?.username || '' });
+          showApp();
+          setMsg('登录成功。', 'ok');
+          setTab('orders');
+          initChartsIfNeeded();
+          await refreshAll();
+          connectSocket();
+        } catch (e) {
+          setMsg(`登录失败：${e.message || e}`, 'error');
+        } finally {
+          loginBtn.disabled = false;
+        }
+      }
+
+      function eyeSvg(visible) {
+        return visible
+          ? `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 4.5c-4.2 0-7.7 2.8-9 5.5 1.3 2.7 4.8 5.5 9 5.5s7.7-2.8 9-5.5c-1.3-2.7-4.8-5.5-9-5.5zm0 9.2a3.7 3.7 0 1 1 0-7.4 3.7 3.7 0 0 1 0 7.4z"/>
+              <path d="M10 7.6a2.4 2.4 0 1 0 0 4.8 2.4 2.4 0 0 0 0-4.8z"/>
+            </svg>
+          `
+          : `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M3.7 2.3a1 1 0 0 0-1.4 1.4l2 2C2.5 6.9 1.5 8.3 1 9.5c1.3 2.7 4.8 5.5 9 5.5 1.8 0 3.4-.4 4.8-1l1.5 1.5a1 1 0 0 0 1.4-1.4L3.7 2.3zm10.1 10.1-1.4-1.4a2.4 2.4 0 0 0-3.3-3.3L7.7 6.3A3.7 3.7 0 0 1 13.8 12.4z"/>
+              <path d="M10 4.5c1.8 0 3.4.4 4.9 1.1 1.8.9 3.2 2.2 4.1 3.9-1.3 2.7-4.8 5.5-9 5.5-.6 0-1.2-.1-1.8-.2l1.7-1.7a3.7 3.7 0 0 0 4.7-4.7l1.6-1.6c-.9-.8-2-1.5-3.2-2-1.2-.6-2.6-.9-4-.9-.9 0-1.8.1-2.7.4l1.5 1.5c.4-.1.8-.1 1.2-.1z"/>
+            </svg>
+          `;
+      }
+
+      function setLoginPasswordVisible(visible) {
+        isLoginPasswordVisible = Boolean(visible);
+        loginPassword.type = isLoginPasswordVisible ? 'text' : 'password';
+        loginPwToggle.innerHTML = eyeSvg(isLoginPasswordVisible);
+      }
+
+      function setPwCurrentVisible(visible) {
+        isPwCurrentVisible = Boolean(visible);
+        pwCurrent.type = isPwCurrentVisible ? 'text' : 'password';
+        pwCurrentToggle.innerHTML = eyeSvg(isPwCurrentVisible);
+      }
+
+      function setPwNextVisible(visible) {
+        isPwNextVisible = Boolean(visible);
+        pwNext.type = isPwNextVisible ? 'text' : 'password';
+        pwNextToggle.innerHTML = eyeSvg(isPwNextVisible);
+      }
+
+      function setNewUserPasswordVisible(visible) {
+        isNewUserPasswordVisible = Boolean(visible);
+        newUserPassword.type = isNewUserPasswordVisible ? 'text' : 'password';
+        newUserPasswordToggle.innerHTML = eyeSvg(isNewUserPasswordVisible);
+      }
+
+      function logout() {
+        disconnectSocket();
+        clearAuth();
+        showLogin();
+        setMsg('已退出登录。', 'info');
+      }
+
+      async function validateTokenAndBoot() {
+        loadAuth();
+        if (!auth.token) {
+          showLogin();
+          return;
+        }
+        try {
+          const resp = await apiFetch('/admin/me', { method: 'GET' });
+          if (!resp.ok) throw new Error(await resp.text());
+          const me = await resp.json();
+          saveAuth({ role: me.role || auth.role, username: me.username || auth.username });
+          showApp();
+          setMsg('准备就绪。', 'info');
+          setTab('orders');
+          initChartsIfNeeded();
+          await refreshAll();
+          connectSocket();
+        } catch (e) {
+          logout();
+        }
+      }
+
+      async function updateMyPassword() {
+        pwUpdateBtn.disabled = true;
+        try {
+          const currentPassword = pwCurrent.value;
+          const newPassword = pwNext.value;
+          const resp = await apiFetch('/admin/me/password', {
+            method: 'PATCH',
+            body: JSON.stringify({ currentPassword, newPassword }),
+          });
+          if (!resp.ok) throw new Error(await resp.text());
+          pwCurrent.value = '';
+          pwNext.value = '';
+          setMsg('密码已更新。', 'ok');
+        } catch (e) {
+          setMsg(`更新失败：${e.message || e}`, 'error');
+        } finally {
+          pwUpdateBtn.disabled = false;
+        }
+      }
+
+      async function loadApiKeyIntoInput() {
+        apiKeyLoadBtn.disabled = true;
+        try {
+          const resp = await apiFetch('/admin/config/api-key', { method: 'GET' });
+          if (!resp.ok) throw new Error(await resp.text());
+          const data = await resp.json();
+          apiKeyValue.value = data.apiKey || '';
+          setMsg('已加载 API Key。', 'ok');
+        } catch (e) {
+          setMsg(`加载失败：${e.message || e}`, 'error');
+        } finally {
+          apiKeyLoadBtn.disabled = false;
+        }
+      }
+
+      async function saveApiKeyFromInput() {
+        apiKeySaveBtn.disabled = true;
+        try {
+          const apiKey = apiKeyValue.value.trim();
+          const resp = await apiFetch('/admin/config/api-key', { method: 'PUT', body: JSON.stringify({ apiKey }) });
+          if (!resp.ok) throw new Error(await resp.text());
+          const data = await resp.json();
+          apiKeyValue.value = data.apiKey || apiKey;
+          setMsg('已保存 API Key。', 'ok');
+        } catch (e) {
+          setMsg(`保存失败：${e.message || e}`, 'error');
+        } finally {
+          apiKeySaveBtn.disabled = false;
+        }
+      }
+
+      async function resetApiKey() {
+        if (!confirm('确认重置 API Key？点餐端/服务台需要同步更新 Key 才能继续使用。')) return;
+        apiKeyResetBtn.disabled = true;
+        try {
+          const resp = await apiFetch('/admin/config/api-key/reset', { method: 'POST' });
+          if (!resp.ok) throw new Error(await resp.text());
+          const data = await resp.json();
+          apiKeyValue.value = data.apiKey || '';
+          setMsg('API Key 已重置。', 'ok');
+        } catch (e) {
+          setMsg(`重置失败：${e.message || e}`, 'error');
+        } finally {
+          apiKeyResetBtn.disabled = false;
+        }
+      }
+
+      function renderUsers(list) {
+        usersTbody.innerHTML = (Array.isArray(list) ? list : [])
+          .map((u) => {
+            const createdHk = escapeHtml(formatHongKongFromIso(u.createdAt));
+            const createdIso = escapeHtml(u.createdAt || '-');
+            const username = escapeHtml(u.username);
+            const id = escapeHtml(u.id);
+            const role = u.role === 'SUPER_ADMIN' ? 'SUPER_ADMIN' : 'ADMIN';
+            const selfTag = u.username === auth.username ? '<span class="ml-2 rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">我</span>' : '';
+            return `
+              <tr>
+                <td class="px-4 py-3 text-sm font-medium">${username}${selfTag}</td>
+                <td class="px-4 py-3 text-sm">
+                  <select data-action="setRole" data-id="${id}" class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm">
+                    <option value="ADMIN" ${role === 'ADMIN' ? 'selected' : ''}>ADMIN</option>
+                    <option value="SUPER_ADMIN" ${role === 'SUPER_ADMIN' ? 'selected' : ''}>SUPER_ADMIN</option>
+                  </select>
+                </td>
+                <td class="px-4 py-3 text-xs text-slate-600"><code title="${createdIso}" class="rounded bg-slate-100 px-1 py-0.5">${createdHk}</code></td>
+                <td class="px-4 py-3 text-sm">
+                  <div class="flex flex-wrap gap-2">
+                    <button data-action="resetPw" data-id="${id}" class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium hover:bg-slate-50">重置密码</button>
+                    <button data-action="deleteUser" data-id="${id}" class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-700">删除</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          })
+          .join('');
+      }
+
+      async function loadUsers() {
+        const resp = await apiFetch('/admin/users', { method: 'GET' });
+        if (!resp.ok) throw new Error(await resp.text());
+        const list = await resp.json();
+        renderUsers(list);
+      }
+
+      async function createUserFromInput() {
+        newUserCreateBtn.disabled = true;
+        try {
+          const username = newUserUsername.value.trim();
+          const password = newUserPassword.value;
+          const role = newUserRole.value;
+          const resp = await apiFetch('/admin/users', { method: 'POST', body: JSON.stringify({ username, password, role }) });
+          if (!resp.ok) throw new Error(await resp.text());
+          newUserUsername.value = '';
+          newUserPassword.value = '';
+          await loadUsers();
+          setMsg('已创建管理员账号。', 'ok');
+        } catch (e) {
+          setMsg(`创建失败：${e.message || e}`, 'error');
+        } finally {
+          newUserCreateBtn.disabled = false;
+        }
+      }
+
+      async function onUsersTableClick(evt) {
+        const btn = evt.target.closest('button');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+        if (!action || !id) return;
+
+        btn.disabled = true;
+        try {
+          if (action === 'resetPw') {
+            const password = prompt('输入新密码（至少 6 位）：');
+            if (!password) return;
+            const resp = await apiFetch(`/admin/users/${encodeURIComponent(id)}`, {
+              method: 'PATCH',
+              body: JSON.stringify({ password }),
+            });
+            if (!resp.ok) throw new Error(await resp.text());
+            setMsg('已重置密码。', 'ok');
+          }
+          if (action === 'deleteUser') {
+            if (!confirm('确认删除该管理员账号？')) return;
+            const resp = await apiFetch(`/admin/users/${encodeURIComponent(id)}`, { method: 'DELETE' });
+            if (!resp.ok && resp.status !== 204) throw new Error(await resp.text());
+            setMsg('已删除账号。', 'ok');
+          }
+          await loadUsers();
+        } catch (e) {
+          setMsg(`操作失败：${e.message || e}`, 'error');
+        } finally {
+          btn.disabled = false;
+        }
+      }
+
+      async function onUsersTableChange(evt) {
+        const sel = evt.target.closest('select');
+        if (!sel) return;
+        const action = sel.dataset.action;
+        const id = sel.dataset.id;
+        if (action !== 'setRole' || !id) return;
+        try {
+          const role = sel.value;
+          const resp = await apiFetch(`/admin/users/${encodeURIComponent(id)}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ role }),
+          });
+          if (!resp.ok) throw new Error(await resp.text());
+          setMsg('角色已更新。', 'ok');
+          await loadUsers();
+        } catch (e) {
+          setMsg(`更新失败：${e.message || e}`, 'error');
+          await loadUsers();
+        }
+      }
+
+      async function refreshSettings() {
+        if (auth.role !== 'SUPER_ADMIN') return;
+        try {
+          await Promise.all([loadApiKeyIntoInput(), loadUsers()]);
+        } catch (_) {
+        }
+      }
+
+      applyUiLang();
+      setMsg('准备就绪。', 'info');
+      setLoginPasswordVisible(false);
+      setPwCurrentVisible(false);
+      setPwNextVisible(false);
+      setNewUserPasswordVisible(false);
+      validateTokenAndBoot();
+    </script>
+  </body>
+</html>
