@@ -1,9 +1,20 @@
 import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../context/LanguageContext';
+import { useOperatorStats, type OperatorStats } from '../hooks/useOperatorStats';
+import { cn } from '../lib/utils';
+import { pickByLang } from '../lib/pickByLang';
 
-const KPI_LABELS = ['PENDING', 'ACKNOWLEDGED', 'OVERDUE', 'DONE'] as const;
+const KPI_ITEMS: { key: keyof OperatorStats; isWarning?: boolean }[] = [
+  { key: 'pending' },
+  { key: 'acknowledged' },
+  { key: 'overdue', isWarning: true },
+  { key: 'done' },
+];
 
 export function ShiftSidebar() {
   const { t } = useTranslation();
+  const { language } = useLanguage();
+  const { stats, defaultTab } = useOperatorStats();
 
   return (
     <aside className="flex w-64 flex-col border-r border-border bg-background">
@@ -12,17 +23,38 @@ export function ShiftSidebar() {
           {t('sidebar.thisShift')}
         </div>
         <div className="grid grid-cols-2 gap-2">
-          {KPI_LABELS.map((label) => (
-            <div
-              key={label}
-              className="rounded-md border border-border bg-background-elevated p-3"
-            >
-              <div className="font-serif text-2xl text-foreground-subtle">—</div>
-              <div className="mt-1 text-[10px] uppercase tracking-widest text-foreground-subtle">
-                {label}
+          {KPI_ITEMS.map(({ key, isWarning }) => {
+            const value = stats[key];
+            const isOverdue = Boolean(isWarning) && value > 0;
+            return (
+              <div
+                key={key}
+                className={cn(
+                  'rounded-md border p-3 transition-colors',
+                  isOverdue
+                    ? 'border-warning/40 bg-warning/10'
+                    : 'border-border bg-background-elevated',
+                )}
+              >
+                <div
+                  className={cn(
+                    'font-serif text-2xl tabular-nums',
+                    isOverdue ? 'text-warning' : 'text-foreground',
+                  )}
+                >
+                  {value}
+                </div>
+                <div
+                  className={cn(
+                    'mt-1 text-[10px] uppercase tracking-widest',
+                    isOverdue ? 'text-warning' : 'text-foreground-subtle',
+                  )}
+                >
+                  {t(`sidebar.kpi.${key}`)}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -30,7 +62,15 @@ export function ShiftSidebar() {
         <div className="mb-2 text-[10px] uppercase tracking-widest text-foreground-subtle">
           {t('sidebar.yourDefaultTab')}
         </div>
-        <div className="font-medium text-foreground">—</div>
+        <div className="font-medium text-foreground">
+          {defaultTab
+            ? pickByLang(
+                { en: defaultTab.nameEn, tc: defaultTab.nameTc, sc: defaultTab.nameSc },
+                language,
+                defaultTab.nameEn,
+              )
+            : '—'}
+        </div>
         <p className="mt-2 text-xs leading-relaxed text-foreground-subtle">
           {t('sidebar.defaultTabHint')}
         </p>

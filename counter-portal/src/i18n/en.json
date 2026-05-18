@@ -22,6 +22,12 @@
   },
   "sidebar": {
     "thisShift": "THIS SHIFT",
+    "kpi": {
+      "pending": "PENDING",
+      "acknowledged": "ACKNOWLEDGED",
+      "overdue": "OVERDUE",
+      "done": "DONE"
+    },
     "yourDefaultTab": "YOUR DEFAULT TAB",
     "defaultTabHint": "Set by your customer admin. Other counters see their own default tab.",
     "alertTimeout": "ALERT TIMEOUT",

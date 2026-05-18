@@ -22,6 +22,12 @@
   },
   "sidebar": {
     "thisShift": "本班次",
+    "kpi": {
+      "pending": "待處理",
+      "acknowledged": "已確認",
+      "overdue": "逾時",
+      "done": "已完成"
+    },
     "yourDefaultTab": "預設標籤",
     "defaultTabHint": "由貴賓室管理員設定。其他櫃檯會看到各自的預設標籤。",
     "alertTimeout": "提醒時間",
