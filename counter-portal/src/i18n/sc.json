@@ -42,6 +42,8 @@
     "allTickets": "所有订单",
     "subtitle": "显示所有订单",
     "active": "{{count}} 笔进行中",
+    "loadingCount": "加载中...",
+    "empty": "此视图没有订单。",
     "placeholder": "订单队列占位 — E4-06 会在此显示订单卡片。"
   },
   "role": {

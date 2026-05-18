@@ -42,6 +42,8 @@
     "allTickets": "所有訂單",
     "subtitle": "顯示所有訂單",
     "active": "{{count}} 筆進行中",
+    "loadingCount": "載入中...",
+    "empty": "此檢視沒有訂單。",
     "placeholder": "訂單佇列預留 — E4-06 會在此顯示訂單卡片。"
   },
   "role": {

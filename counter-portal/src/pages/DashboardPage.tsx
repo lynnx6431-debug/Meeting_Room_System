@@ -6,6 +6,8 @@ import { ShiftSidebar } from '../components/ShiftSidebar';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useOperatorCategories } from '../hooks/useOperatorCategories';
+import { useOperatorOrders } from '../hooks/useOperatorOrders';
+import { derivedStatus } from '../lib/orderStatus';
 import { pickByLang } from '../lib/pickByLang';
 
 function useClock() {
@@ -26,6 +28,9 @@ export function DashboardPage() {
   // Lifted here so the queue (E4-06) can share the same active-tab filter.
   const [activeTabId, setActiveTabId] = useState<string>('all');
   const { categories, defaultCategoryId, loading } = useOperatorCategories();
+  const { orders, loading: ordersLoading } = useOperatorOrders({
+    categoryId: activeTabId === 'all' ? undefined : activeTabId,
+  });
 
   const activeTitle = useMemo(() => {
     if (activeTabId === 'all') {
@@ -64,15 +69,40 @@ export function DashboardPage() {
                 <h2 className="font-serif text-3xl">{activeTitle}</h2>
                 <p className="mt-1 text-sm text-foreground-muted">
                   {t('queue.subtitle')} ·{' '}
-                  <span className="text-foreground">{t('queue.active', { count: 0 })}</span>
+                  <span className="text-foreground">
+                    {ordersLoading
+                      ? t('queue.loadingCount')
+                      : t('queue.active', { count: orders.length })}
+                  </span>
                 </p>
               </div>
               <div className="text-sm tabular-nums text-foreground-muted">{clock}</div>
             </div>
 
-            <div className="flex flex-col items-center justify-center py-20 text-foreground-subtle">
-              <p className="text-sm">{t('queue.placeholder')}</p>
-            </div>
+            {/* TODO E4-06: replace this raw dump with order cards. This proves
+                the RBAC-filtered data flow (room + Option C category) works. */}
+            {ordersLoading ? (
+              <div className="py-20 text-center text-sm text-foreground-subtle">
+                {t('queue.loadingCount')}
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="py-20 text-center text-sm text-foreground-subtle">
+                {t('queue.empty')}
+              </div>
+            ) : (
+              <pre className="overflow-x-auto rounded-lg border border-border bg-background-elevated p-4 text-xs text-foreground-muted">
+                {JSON.stringify(
+                  orders.map((o) => ({
+                    id: o.id.slice(0, 8),
+                    status: derivedStatus(o),
+                    room: o.room.code || o.room.name,
+                    items: o.items.map((it) => `${it.name}×${it.qty}`),
+                  })),
+                  null,
+                  2,
+                )}
+              </pre>
+            )}
           </main>
         </div>
       </div>

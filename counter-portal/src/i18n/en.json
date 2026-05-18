@@ -42,6 +42,8 @@
     "allTickets": "All tickets",
     "subtitle": "Showing all tickets",
     "active": "{{count}} active",
+    "loadingCount": "Loading...",
+    "empty": "No tickets in this view.",
     "placeholder": "Queue placeholder — E4-06 will render order cards here."
   },
   "role": {
