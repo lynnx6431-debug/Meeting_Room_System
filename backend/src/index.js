@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
@@ -13,6 +14,8 @@ const serviceCountersRouter = require('./routes/serviceCounters');
 const categoriesRouter = require('./routes/categories');
 const authRouter = require('./routes/auth');
 const adminRouter = require('./routes/admin');
+const guestRouter = require('./routes/guest');
+const devRouter = process.env.NODE_ENV !== 'production' ? require('./routes/dev') : null;
 const { isValidApiKey, verifyJwtToken } = require('./middleware/auth');
 
 const PORT = process.env.PORT || 3000;
@@ -59,6 +62,7 @@ io.use(async (socket, next) => {
 app.set('socketio', io);
 
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json({ limit: '15mb' }));
 
 const uploadsDir = path.join(__dirname, '..', 'uploads');
@@ -73,6 +77,11 @@ app.get('/health', (req, res) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/guest', guestRouter);
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/api/dev', devRouter);
+  console.log('[dev] /api/dev/* endpoints enabled (NODE_ENV !== production)');
+}
 app.use('/api/orders', ordersRouter);
 app.use('/api/menu', menuRouter);
 app.use('/api/rooms', roomsRouter);

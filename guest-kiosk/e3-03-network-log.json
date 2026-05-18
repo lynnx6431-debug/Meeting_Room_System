@@ -1,0 +1,42 @@
+[
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:5173/api/dev/demo-rooms",
+    "status": 200
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:5173/api/dev/demo-rooms",
+    "status": 304
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:5173/api/guest/me",
+    "status": 200
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:5173/api/guest/me",
+    "status": 304
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:5173/api/guest/session",
+    "status": 200
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:5173/api/guest/session",
+    "status": 304
+  },
+  {
+    "method": "POST",
+    "url": "http://127.0.0.1:5173/api/guest/session",
+    "status": 201
+  },
+  {
+    "method": "POST",
+    "url": "http://127.0.0.1:3000/api/admin/rooms/cmp5ac87j0009yna9wzvu1yl0/reset",
+    "status": 200
+  }
+]
