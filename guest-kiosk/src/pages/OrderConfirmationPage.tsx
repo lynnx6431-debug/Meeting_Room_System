@@ -12,7 +12,7 @@ export function OrderConfirmationPage() {
   return (
     <div className="flex h-screen flex-col bg-background">
       <div className="flex justify-end p-4 sm:p-6">
-        <LanguageToggle />
+        <LanguageToggle variant="onLight" />
       </div>
 
       <div className="flex flex-1 items-center justify-center px-6 pb-8 sm:px-8">
