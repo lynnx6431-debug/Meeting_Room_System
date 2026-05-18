@@ -1,4 +1,5 @@
 ﻿import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { DevResetButton } from './components/DevResetButton';
 import { DevTokenHelper } from './components/DevTokenHelper';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { BrandingProvider } from './context/BrandingContext';
@@ -47,6 +48,7 @@ export default function App() {
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </BrowserRouter>
+            <DevResetButton token={token} />
           </SessionProvider>
         </BrandingProvider>
       </LanguageProvider>
