@@ -433,7 +433,55 @@ async function ensureDemoSessionFixtures() {
     data: { defaultOperatorId: operatorTidy.id },
   });
 
+  // ── E4-05: deterministic demo orders for the counter portal ──────────────
+  // Recreated every seed run so RBAC / KPI screenshots are stable. This also
+  // clears prior throwaway test orders for this demo tenant. Order.items is a
+  // JSON blob shaped exactly like the guest submit path: {itemId,qty,name}.
+  await prisma.order.deleteMany({ where: { tenantId: tenant.id } });
+
+  const itemRows = await prisma.menuItem.findMany({
+    where: { siteId: site.id },
+    select: { id: true, key: true },
+  });
+  const itemByKey = new Map(itemRows.map((i) => [i.key, i.id]));
+  const li = (key, qty) => ({ itemId: itemByKey.get(key), qty, name: key });
+  const minsAgo = (m) => new Date(Date.now() - m * 60_000);
+
+  const demoOrders = [
+    // overdue (>60s & pending) — bev (Drinks)
+    { roomId: room.id, items: [li('drink-coffee', 2)], status: 'pending', createdAt: minsAgo(6) },
+    // bev (Snacks), acknowledged
+    { roomId: room.id, items: [li('snack-chips', 1)], status: 'acknowledged', createdAt: minsAgo(4) },
+    // cross-category: bev sees (tea=Drinks), tidy sees (tidy-basic)
+    { roomId: room.id, items: [li('drink-tea', 1), li('tidy-basic', 1)], status: 'pending', createdAt: minsAgo(0.5) },
+    // bev (Drinks), done
+    { roomId: roomLibrary.id, items: [li('drink-coffee', 1)], status: 'done', createdAt: minsAgo(20) },
+    // bev (Snacks), fresh pending
+    { roomId: roomTasting.id, items: [li('snack-nuts', 2)], status: 'pending', createdAt: minsAgo(0.2) },
+    // pure Tidy — bev NOT visible, operator-tidy visible (reverse RBAC proof)
+    { roomId: room.id, items: [li('tidy-deep', 1)], status: 'pending', createdAt: minsAgo(3) },
+  ];
+
+  for (const o of demoOrders) {
+    const acknowledged = o.status === 'acknowledged' || o.status === 'done';
+    await prisma.order.create({
+      data: {
+        tenantId: tenant.id,
+        siteId: site.id,
+        roomId: o.roomId,
+        items: o.items,
+        status: o.status,
+        createdAt: o.createdAt,
+        acknowledgedAt: acknowledged ? o.createdAt : null,
+        acknowledgedBy: acknowledged ? operatorBev.id : null,
+        completedAt: o.status === 'done' ? o.createdAt : null,
+        completedBy: o.status === 'done' ? operatorBev.id : null,
+      },
+    });
+  }
+
   console.log('Demo seed complete:');
+  console.log(`  Orders: ${demoOrders.length} demo orders (prior tenant orders cleared)`);
   console.log(`  Tenant: ${tenant.name} (${tenant.id})`);
   console.log(`  Site:   ${site.name} (${site.id})`);
   console.log('  Rooms:  3');
