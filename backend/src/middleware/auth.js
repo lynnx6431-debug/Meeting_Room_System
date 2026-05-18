@@ -94,6 +94,28 @@ const validateJwt = (req, res, next) => {
   return next();
 };
 
+const validateJwtOrApiKey = async (req, res, next) => {
+  try {
+    const token = extractBearerToken(req.headers.authorization);
+    const payload = token ? verifyJwtToken(token) : null;
+    if (payload && payload.uid && payload.role) {
+      req.admin = { id: payload.uid, role: payload.role };
+      req.authType = 'jwt';
+      return next();
+    }
+
+    const apiKey = req.headers['x-api-key'];
+    if (await isValidApiKey(apiKey)) {
+      req.authType = 'api_key';
+      return next();
+    }
+
+    return res.status(401).json({ error: 'Unauthorized: Invalid token or API key' });
+  } catch (e) {
+    return res.status(500).json({ error: 'Failed to validate request auth' });
+  }
+};
+
 const requireSuperAdmin = (req, res, next) => {
   if (!req.admin || req.admin.role !== 'SUPER_ADMIN') {
     return res.status(403).json({ error: 'Forbidden: SUPER_ADMIN required' });
@@ -115,5 +137,6 @@ module.exports = {
   signJwtToken,
   validateApiKey,
   validateJwt,
+  validateJwtOrApiKey,
   verifyJwtToken,
 };

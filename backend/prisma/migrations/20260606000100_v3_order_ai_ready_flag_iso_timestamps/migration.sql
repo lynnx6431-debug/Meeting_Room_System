@@ -1,5 +1,0 @@
-ALTER TABLE "orders" ADD COLUMN "ai_ready_flag" BOOLEAN NOT NULL DEFAULT false;
-
-ALTER TABLE "orders"
-  ALTER COLUMN "created_at" TYPE TIMESTAMPTZ(3) USING "created_at" AT TIME ZONE 'UTC',
-  ALTER COLUMN "updated_at" TYPE TIMESTAMPTZ(3) USING "updated_at" AT TIME ZONE 'UTC';

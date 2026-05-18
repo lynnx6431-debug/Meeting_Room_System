@@ -1,0 +1,65 @@
+{
+  "welcome": {
+    "title": "欢迎光临 {{roomName}}",
+    "subtitle": "请随意休憩。我们的团队将为您及尊贵宾客效劳。",
+    "headcount": "用餐人数",
+    "headcountHelp": "每个类别的订购量上限为此数字。",
+    "confirm": "确认并进入菜单",
+    "wifi": "WiFi 网络及 QR 码",
+    "submitting": "创建会话中...",
+    "sessionActive": "会话进行中",
+    "partyOf_other": "{{count}} 位",
+    "sessionResume": "您的会话仍在进行，返回菜单继续订购。",
+    "returnToMenu": "返回菜单"
+  },
+  "menu": {
+    "catalogue": "餐单目录",
+    "needHelp": "需要协助",
+    "needHelpBody": "请拨 #0 或点击 Concierge",
+    "yourSelection": "你的选择",
+    "itemCount_other": "{{count}} 项",
+    "noItemsSelected": "尚未选择任何项目",
+    "chooseFromCatalogue": "请从目录中选择",
+    "placeOrder": "提交订单",
+    "used": "已用 {{used}}/{{cap}}",
+    "items": "{{count}} 项",
+    "upTo": "每个类别最多 {{cap}} 份",
+    "categoryFull": "此类别已满",
+    "tapToAdd": "点击加入",
+    "selected": "已选择",
+    "submitting": "提交中...",
+    "increment": "增加一份",
+    "decrement": "减少一份",
+    "removeFromCart": "移除",
+    "allCategoriesFull": "本次会话的所有类别均已达上限，如需更多服务请联系接待处。",
+    "backToHome": "返回首页"
+  },
+  "errors": {
+    "INVALID_ROOM_TOKEN": "房间链接已失效，请向职员索取新链接。",
+    "TENANT_SUSPENDED": "服务暂时不可用，不便之处敬请原谅。",
+    "LICENSE_EXPIRED": "服务不可用，请联系前台。",
+    "NO_ACTIVE_SESSION": "会话已过期，请重新载入。",
+    "ROOM_ALREADY_OCCUPIED": "此房间已有进行中的使用时段。",
+    "INVALID_HEADCOUNT": "请选择 1 到 10 之间的有效人数。",
+    "ITEM_LIMIT_REACHED": "此项目已达订购上限。",
+    "ITEM_TAKEN": "此项目已被选择，无法重复订购。",
+    "CATEGORY_FULL": "此类别已达订购上限。",
+    "CONCURRENT_USAGE_CONFLICT": "正在处理另一笔订单，请稍后重试。",
+    "INVALID_QTY_FOR_ONE_OFF": "此项目只能选择一次。",
+    "NETWORK": "无法连接服务，请稍后重试。"
+  },
+  "confirmation": {
+    "title": "订单已提交",
+    "subtitle": "我们的团队将尽快为您送上服务。",
+    "orderId": "订单编号",
+    "orderMore": "继续点餐"
+  },
+  "wifi": {
+    "title": "WIFI 连接",
+    "scanToConnect": "扫码连接",
+    "helpText": "请使用手机相机扫描下方二维码。",
+    "network": "网络名称",
+    "close": "关闭",
+    "error": "无法加载 WiFi 二维码。"
+  }
+}

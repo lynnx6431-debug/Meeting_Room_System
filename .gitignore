@@ -30,6 +30,13 @@ frontend/.idea/
 frontend/*.iml
 frontend/metadata.yaml
 
+# Claude Code worktrees / local agent state
+.claude/worktrees/
+
+# Transient browser profiles from preview/screenshot tooling
+.chrome-profile/
+guest-kiosk/.chrome-profile/
+
 # OS files
 .DS_Store
 Thumbs.db
