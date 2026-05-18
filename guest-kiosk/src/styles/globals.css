@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Default branding; BrandingContext overrides this at runtime. */
+    --color-primary: 0 132 92;
+    --color-primary-foreground: 255 255 255;
+    --color-background: 252 250 245;
+    --color-foreground: 24 24 24;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: 'cv02', 'cv03', 'cv04';
+    font-family: Inter, 'PingFang TC', 'PingFang SC', system-ui, sans-serif;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+}

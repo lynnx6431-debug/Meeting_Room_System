@@ -1,29 +1,17 @@
 const express = require('express');
-const prisma = require('../lib/prisma');
 const { validateApiKey } = require('../middleware/auth');
 
 const router = express.Router();
 
 router.use(validateApiKey);
 
-router.get('/', async (req, res) => {
-  try {
-    const list = await prisma.category.findMany({
-      orderBy: { name: 'asc' },
-      select: {
-        id: true,
-        name: true,
-        nameZh: true,
-        nameEn: true,
-        nameHant: true,
-        imageUrl: true,
-        serviceCounterId: true,
-      },
-    });
-    return res.json(list);
-  } catch (_) {
-    return res.status(500).json({ error: 'Failed to list categories' });
-  }
-});
+// E2-TODO: rebuild public category endpoint against menu_categories in V4.
+router.get('/', async (req, res) =>
+  res.status(503).json({
+    error: 'Categories API is temporarily disabled in V4 compatibility mode',
+    code: 'E1_V4_COMPAT_DISABLED',
+    feature: 'categories',
+    todo: 'E2-TODO: rebuild public category endpoint against menu_categories',
+  }));
 
 module.exports = router;

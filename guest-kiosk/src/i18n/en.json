@@ -1,0 +1,67 @@
+{
+  "welcome": {
+    "title": "Welcome to {{roomName}}",
+    "subtitle": "Please make yourself comfortable. Our team is honoured to attend to you.",
+    "headcount": "HEADCOUNT",
+    "headcountHelp": "Each category is capped at this number for the duration of your session.",
+    "confirm": "CONFIRM & ENTER MENU",
+    "wifi": "WiFi network & QR",
+    "submitting": "Creating session...",
+    "sessionActive": "SESSION ACTIVE",
+    "partyOf_one": "Party of {{count}}",
+    "partyOf_other": "Party of {{count}}",
+    "sessionResume": "Your session is still active. Return to the menu to continue ordering.",
+    "returnToMenu": "RETURN TO MENU"
+  },
+  "menu": {
+    "catalogue": "CATALOGUE",
+    "needHelp": "NEED HELP",
+    "needHelpBody": "Dial #0 or tap Concierge",
+    "yourSelection": "YOUR SELECTION",
+    "itemCount_one": "{{count}} item",
+    "itemCount_other": "{{count}} items",
+    "noItemsSelected": "No items selected",
+    "chooseFromCatalogue": "Choose from the catalogue",
+    "placeOrder": "PLACE ORDER",
+    "used": "{{used}}/{{cap}} used",
+    "items": "{{count}} ITEMS",
+    "upTo": "Up to {{cap}} per category",
+    "categoryFull": "CATEGORY FULL",
+    "tapToAdd": "TAP TO ADD",
+    "selected": "SELECTED",
+    "submitting": "Submitting...",
+    "increment": "Add one more",
+    "decrement": "Remove one",
+    "removeFromCart": "Remove",
+    "allCategoriesFull": "All categories have reached their limit for this session. Please contact reception for more service.",
+    "backToHome": "Back to home"
+  },
+  "errors": {
+    "INVALID_ROOM_TOKEN": "This room link has expired. Please ask staff for a new one.",
+    "TENANT_SUSPENDED": "Service temporarily unavailable. We apologise for the inconvenience.",
+    "LICENSE_EXPIRED": "Service unavailable. Please contact reception.",
+    "NO_ACTIVE_SESSION": "Your session has expired. Please reload.",
+    "ROOM_ALREADY_OCCUPIED": "A session is already active for this room.",
+    "INVALID_HEADCOUNT": "Please choose a valid headcount between 1 and 10.",
+    "ITEM_LIMIT_REACHED": "You have reached the limit for this item.",
+    "ITEM_TAKEN": "This item has already been ordered.",
+    "CATEGORY_FULL": "This category is fully ordered for your party size.",
+    "CONCURRENT_USAGE_CONFLICT": "Another order is being processed. Please try again.",
+    "INVALID_QTY_FOR_ONE_OFF": "This item can only be selected once.",
+    "NETWORK": "Cannot reach the service. Please try again."
+  },
+  "confirmation": {
+    "title": "Order Placed",
+    "subtitle": "Our team will attend to you shortly.",
+    "orderId": "Order ID",
+    "orderMore": "ORDER MORE"
+  },
+  "wifi": {
+    "title": "WIFI ACCESS",
+    "scanToConnect": "Scan to Connect",
+    "helpText": "Open your phone camera and point it at the QR code below.",
+    "network": "NETWORK NAME",
+    "close": "Close",
+    "error": "Could not load WiFi QR code."
+  }
+}

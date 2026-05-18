@@ -1,0 +1,65 @@
+{
+  "welcome": {
+    "title": "歡迎光臨 {{roomName}}",
+    "subtitle": "請隨意休憩。我們的團隊將為您及尊貴賓客效勞。",
+    "headcount": "用餐人數",
+    "headcountHelp": "每個類別的訂購量上限為此數字。",
+    "confirm": "確認並進入菜單",
+    "wifi": "WiFi 網絡及 QR Code",
+    "submitting": "建立會話中...",
+    "sessionActive": "會話進行中",
+    "partyOf_other": "{{count}} 位",
+    "sessionResume": "您的會話仍在進行，返回菜單繼續訂購。",
+    "returnToMenu": "返回菜單"
+  },
+  "menu": {
+    "catalogue": "餐單目錄",
+    "needHelp": "需要協助",
+    "needHelpBody": "請撥 #0 或點擊 Concierge",
+    "yourSelection": "你的選擇",
+    "itemCount_other": "{{count}} 項",
+    "noItemsSelected": "尚未選擇任何項目",
+    "chooseFromCatalogue": "請從目錄中選擇",
+    "placeOrder": "提交訂單",
+    "used": "已用 {{used}}/{{cap}}",
+    "items": "{{count}} 項",
+    "upTo": "每個類別最多 {{cap}} 份",
+    "categoryFull": "此類別已滿",
+    "tapToAdd": "點擊加入",
+    "selected": "已選擇",
+    "submitting": "提交中...",
+    "increment": "增加一份",
+    "decrement": "減少一份",
+    "removeFromCart": "移除",
+    "allCategoriesFull": "本次會話的所有類別均已達上限，如需更多服務請聯繫接待處。",
+    "backToHome": "返回首頁"
+  },
+  "errors": {
+    "INVALID_ROOM_TOKEN": "房間連結已失效，請向職員索取新連結。",
+    "TENANT_SUSPENDED": "服務暫時不可用，不便之處敬請原諒。",
+    "LICENSE_EXPIRED": "服務不可用，請聯絡前台。",
+    "NO_ACTIVE_SESSION": "會話已過期，請重新載入。",
+    "ROOM_ALREADY_OCCUPIED": "此房間已有進行中的使用時段。",
+    "INVALID_HEADCOUNT": "請選擇 1 至 10 之間的有效人數。",
+    "ITEM_LIMIT_REACHED": "此項目已達訂購上限。",
+    "ITEM_TAKEN": "此項目已被選擇，無法重複訂購。",
+    "CATEGORY_FULL": "此類別已達訂購上限。",
+    "CONCURRENT_USAGE_CONFLICT": "正在處理另一筆訂單，請稍後重試。",
+    "INVALID_QTY_FOR_ONE_OFF": "此項目只能選擇一次。",
+    "NETWORK": "無法連接服務，請稍後重試。"
+  },
+  "confirmation": {
+    "title": "訂單已提交",
+    "subtitle": "我們的團隊將為您送上服務。",
+    "orderId": "訂單編號",
+    "orderMore": "繼續訂購"
+  },
+  "wifi": {
+    "title": "WIFI 連接",
+    "scanToConnect": "掃碼連接",
+    "helpText": "請使用手機相機掃描下方 QR 碼。",
+    "network": "網絡名稱",
+    "close": "關閉",
+    "error": "無法載入 WiFi 二維碼。"
+  }
+}

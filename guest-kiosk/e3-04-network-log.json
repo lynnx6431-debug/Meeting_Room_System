@@ -1,0 +1,49 @@
+{
+  "network": [
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:5173/api/guest/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:5173/api/guest/me",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:5173/api/guest/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:5173/api/guest/session",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:5173/api/guest/menu",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:5173/api/guest/menu",
+      "status": 304
+    }
+  ],
+  "console": [
+    {
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    }
+  ],
+  "pageErrors": []
+}
