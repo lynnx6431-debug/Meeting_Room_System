@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dark theme — Operator Counter (fully independent of guest-kiosk) */
+    --color-background: 12 18 32; /* #0c1220 deep navy */
+    --color-background-elevated: 20 28 47; /* #141c2f cards */
+    --color-foreground: 230 235 245; /* #e6ebf5 main text */
+    --color-foreground-muted: 140 150 170; /* secondary text */
+    --color-foreground-subtle: 90 100 120; /* tertiary */
+
+    /* Brand */
+    --color-primary: 0 200 130; /* brighter green for dark bg */
+    --color-primary-foreground: 12 18 32;
+
+    /* Status */
+    --color-accent: 167 139 250; /* purple — active tab */
+    --color-warning: 244 114 102; /* red — OVERDUE */
+    --color-success: 0 200 130; /* same as primary */
+
+    /* Border */
+    --color-border: 35 45 65;
+
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-[rgb(var(--color-background))] text-[rgb(var(--color-foreground))];
+    font-family: 'Inter', 'SF Pro Text', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+  }
+
+  * {
+    border-color: rgb(var(--color-border));
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "login": {
+    "title": "Counter View",
+    "subtitle": "Sign in to access your counter queue.",
+    "username": "Username",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in...",
+    "devHint": "Demo: operator-bev / demo123"
+  },
+  "dashboard": {
+    "placeholder": "Counter View (E4-02 placeholder)",
+    "loggedInAs": "Logged in as",
+    "role": "Role",
+    "logout": "Logout"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "back": "Back to dashboard"
+  },
+  "errors": {
+    "INVALID_CREDENTIALS": "Invalid username or password.",
+    "USER_DISABLED": "This account has been disabled.",
+    "NETWORK": "Cannot reach the server. Please try again."
+  }
+}
