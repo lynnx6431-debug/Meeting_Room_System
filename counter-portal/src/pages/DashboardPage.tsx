@@ -1,11 +1,23 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LogOut } from 'lucide-react';
-import { LanguageToggle } from '../components/LanguageToggle';
+import { CategoryTabBar } from '../components/CategoryTabBar';
+import { DashboardHeader } from '../components/DashboardHeader';
+import { ShiftSidebar } from '../components/ShiftSidebar';
 import { useAuth } from '../context/AuthContext';
+
+function useClock() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+  return now.toLocaleTimeString('en-GB');
+}
 
 export function DashboardPage() {
   const { t } = useTranslation();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const clock = useClock();
 
   // ProtectedRoute guarantees a token; user is persisted alongside it.
   if (!user) {
@@ -14,38 +26,30 @@ export function DashboardPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <div className="flex items-center justify-between border-b border-border px-8 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary font-serif text-lg font-bold text-primary-foreground">
-            M
-          </div>
-          <div>
-            <div className="text-xs uppercase tracking-widest text-foreground-muted">
-              Manulife · Counter View
-            </div>
-            <div className="text-sm font-medium">{user.username}</div>
-          </div>
-        </div>
-        <LanguageToggle />
-      </div>
+      <DashboardHeader />
 
-      <div className="flex flex-1 items-center justify-center px-8">
-        <div className="w-full max-w-lg rounded-xl border border-border bg-background-elevated p-8 text-center">
-          <h1 className="mb-6 font-serif text-2xl">{t('dashboard.placeholder')}</h1>
-          <p className="mb-1 text-foreground-muted">
-            {t('dashboard.loggedInAs')} <strong className="text-foreground">{user.username}</strong>
-          </p>
-          <p className="mb-8 text-foreground-muted">
-            {t('dashboard.role')}: <span className="text-accent">{user.role}</span>
-          </p>
-          <button
-            type="button"
-            onClick={logout}
-            className="inline-flex items-center gap-2 rounded-lg border border-warning/20 bg-warning/10 px-4 py-2 text-sm text-warning transition-colors hover:bg-warning/20"
-          >
-            <LogOut size={16} />
-            {t('dashboard.logout')}
-          </button>
+      <div className="flex flex-1 overflow-hidden">
+        <ShiftSidebar />
+
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <CategoryTabBar />
+
+          <main className="flex-1 overflow-y-auto p-8">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="font-serif text-3xl">{t('queue.title')}</h2>
+                <p className="mt-1 text-sm text-foreground-muted">
+                  {t('queue.subtitle')} ·{' '}
+                  <span className="text-foreground">{t('queue.active', { count: 0 })}</span>
+                </p>
+              </div>
+              <div className="text-sm tabular-nums text-foreground-muted">{clock}</div>
+            </div>
+
+            <div className="flex flex-col items-center justify-center py-20 text-foreground-subtle">
+              <p className="text-sm">{t('queue.placeholder')}</p>
+            </div>
+          </main>
         </div>
       </div>
     </div>

@@ -14,6 +14,30 @@
     "role": "角色",
     "logout": "登出"
   },
+  "header": {
+    "counterView": "柜台系统",
+    "counterLabel": "饮品柜台 · 香港中环",
+    "liveSocket": "实时连接",
+    "logout": "登出"
+  },
+  "sidebar": {
+    "thisShift": "本班次",
+    "yourDefaultTab": "默认标签",
+    "defaultTabHint": "由贵宾室管理员设定。其他柜台会看到各自的默认标签。",
+    "alertTimeout": "提醒时间",
+    "alertTimeoutHint": "未在指定时间内确认的订单将闪红。"
+  },
+  "queue": {
+    "title": "订单队列",
+    "subtitle": "显示所有订单",
+    "active": "{{count}} 笔进行中",
+    "placeholder": "订单队列占位 — E4-06 会在此显示订单卡片。"
+  },
+  "role": {
+    "SUPER_ADMIN": "超级管理员",
+    "CUSTOMER_ADMIN": "客户管理员",
+    "OPERATOR": "服务员"
+  },
   "notFound": {
     "title": "找不到页面",
     "back": "返回主控台"

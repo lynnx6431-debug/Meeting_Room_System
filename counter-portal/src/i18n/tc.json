@@ -14,6 +14,30 @@
     "role": "角色",
     "logout": "登出"
   },
+  "header": {
+    "counterView": "櫃檯系統",
+    "counterLabel": "飲品櫃檯 · 香港中環",
+    "liveSocket": "即時連線",
+    "logout": "登出"
+  },
+  "sidebar": {
+    "thisShift": "本班次",
+    "yourDefaultTab": "預設標籤",
+    "defaultTabHint": "由貴賓室管理員設定。其他櫃檯會看到各自的預設標籤。",
+    "alertTimeout": "提醒時間",
+    "alertTimeoutHint": "未在指定時間內確認的訂單將閃紅。"
+  },
+  "queue": {
+    "title": "訂單佇列",
+    "subtitle": "顯示所有訂單",
+    "active": "{{count}} 筆進行中",
+    "placeholder": "訂單佇列預留 — E4-06 會在此顯示訂單卡片。"
+  },
+  "role": {
+    "SUPER_ADMIN": "超級管理員",
+    "CUSTOMER_ADMIN": "客戶管理員",
+    "OPERATOR": "服務員"
+  },
   "notFound": {
     "title": "找不到頁面",
     "back": "返回主控台"

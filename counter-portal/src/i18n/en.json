@@ -14,6 +14,30 @@
     "role": "Role",
     "logout": "Logout"
   },
+  "header": {
+    "counterView": "COUNTER VIEW",
+    "counterLabel": "Beverages counter · Central Hong Kong",
+    "liveSocket": "Live socket",
+    "logout": "Sign out"
+  },
+  "sidebar": {
+    "thisShift": "THIS SHIFT",
+    "yourDefaultTab": "YOUR DEFAULT TAB",
+    "defaultTabHint": "Set by your customer admin. Other counters see their own default tab.",
+    "alertTimeout": "ALERT TIMEOUT",
+    "alertTimeoutHint": "Tickets flash red if not acknowledged in time."
+  },
+  "queue": {
+    "title": "Queue",
+    "subtitle": "Showing all tickets",
+    "active": "{{count}} active",
+    "placeholder": "Queue placeholder — E4-06 will render order cards here."
+  },
+  "role": {
+    "SUPER_ADMIN": "Super admin",
+    "CUSTOMER_ADMIN": "Customer admin",
+    "OPERATOR": "Operator"
+  },
   "notFound": {
     "title": "Page not found",
     "back": "Back to dashboard"
