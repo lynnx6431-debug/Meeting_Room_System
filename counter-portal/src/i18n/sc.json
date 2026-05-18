@@ -33,8 +33,13 @@
     "alertTimeout": "提醒时间",
     "alertTimeoutHint": "未在指定时间内确认的订单将闪红。"
   },
+  "tab": {
+    "all": "全部",
+    "loading": "加载中..."
+  },
   "queue": {
     "title": "订单队列",
+    "allTickets": "所有订单",
     "subtitle": "显示所有订单",
     "active": "{{count}} 笔进行中",
     "placeholder": "订单队列占位 — E4-06 会在此显示订单卡片。"

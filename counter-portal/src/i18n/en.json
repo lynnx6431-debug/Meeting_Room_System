@@ -33,8 +33,13 @@
     "alertTimeout": "ALERT TIMEOUT",
     "alertTimeoutHint": "Tickets flash red if not acknowledged in time."
   },
+  "tab": {
+    "all": "All",
+    "loading": "Loading..."
+  },
   "queue": {
     "title": "Queue",
+    "allTickets": "All tickets",
     "subtitle": "Showing all tickets",
     "active": "{{count}} active",
     "placeholder": "Queue placeholder — E4-06 will render order cards here."

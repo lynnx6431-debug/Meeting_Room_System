@@ -33,8 +33,13 @@
     "alertTimeout": "提醒時間",
     "alertTimeoutHint": "未在指定時間內確認的訂單將閃紅。"
   },
+  "tab": {
+    "all": "全部",
+    "loading": "載入中..."
+  },
   "queue": {
     "title": "訂單佇列",
+    "allTickets": "所有訂單",
     "subtitle": "顯示所有訂單",
     "active": "{{count}} 筆進行中",
     "placeholder": "訂單佇列預留 — E4-06 會在此顯示訂單卡片。"

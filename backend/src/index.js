@@ -15,6 +15,7 @@ const categoriesRouter = require('./routes/categories');
 const authRouter = require('./routes/auth');
 const adminRouter = require('./routes/admin');
 const guestRouter = require('./routes/guest');
+const operatorRouter = require('./routes/operator');
 const devRouter = process.env.NODE_ENV !== 'production' ? require('./routes/dev') : null;
 const { isValidApiKey, verifyJwtToken } = require('./middleware/auth');
 
@@ -78,6 +79,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/guest', guestRouter);
+app.use('/api/operator', operatorRouter);
 if (process.env.NODE_ENV !== 'production') {
   app.use('/api/dev', devRouter);
   console.log('[dev] /api/dev/* endpoints enabled (NODE_ENV !== production)');
