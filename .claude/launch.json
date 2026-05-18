@@ -1,0 +1,27 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "D:/Workspace/Meeting_Room_System_Architecture_V3/backend",
+        "run",
+        "dev"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "guest-kiosk",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "D:/Workspace/Meeting_Room_System_Architecture_V3/guest-kiosk",
+        "run",
+        "dev"
+      ],
+      "port": 5173
+    }
+  ]
+}
