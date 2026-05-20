@@ -57,6 +57,12 @@
     "label": "人数",
     "updateFailed": "无法更新人数,已还原。"
   },
+  "counter": {
+    "ackFailed": "确认订单失败,请重试。",
+    "completeFailed": "标记完成失败,请重试。",
+    "socketDisconnected": "实时连接已中断。",
+    "socketReconnecting": "重新连接中..."
+  },
   "role": {
     "SUPER_ADMIN": "超级管理员",
     "CUSTOMER_ADMIN": "客户管理员",

@@ -10,8 +10,10 @@ const MAX = 50;
 const DEBOUNCE_MS = 500;
 
 // Embedded − [n] + stepper (design page 4). Optimistic + debounced PATCH
-// with rollback. The value useEffect also lets E4-07 SSE pushes sync an
-// externally-changed headcount without extra wiring.
+// with rollback. E4-07: the prop `value` is now the single source of
+// truth — Socket.IO `ticket_updated` pushes flow through the reducer to
+// refresh it after every successful PATCH (own or another counter's).
+// (The earlier local-baseline ref shim was retired with the SSE landing.)
 export function HeadcountStepper({
   value,
   sessionId,
@@ -27,33 +29,23 @@ export function HeadcountStepper({
   const [local, setLocal] = useState<number>(value ?? 0);
   const [saving, setSaving] = useState(false);
   const timer = useRef<number | null>(null);
-  // Last server-confirmed value. E4-06 has no refetch/SSE yet, so the `value`
-  // prop stays at first load; tracking confirmations here makes rollback land
-  // on the truly-persisted number instead of a stale prop. E4-07 SSE will
-  // refresh `value` and the effect below keeps this in sync.
-  const confirmed = useRef<number>(value ?? 0);
 
+  // Sync local to whatever the server says (initial load + every push).
   useEffect(() => {
-    if (value != null) {
-      confirmed.current = value;
-      setLocal(value);
-    }
+    if (value != null) setLocal(value);
   }, [value]);
 
-  // Debounced persist: rapid +/+/+ collapses into one request; rollback on fail.
+  // Debounced persist: rapid +/+/+ collapses into one request; on failure
+  // we roll back to the latest prop value.
   useEffect(() => {
     if (value == null || sessionId == null) return;
-    if (local === confirmed.current) return;
+    if (local === value) return;
     if (timer.current) window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => {
-      const target = local;
       setSaving(true);
-      mutate(sessionId, target)
-        .then(() => {
-          confirmed.current = target; // persisted — new known-good baseline
-        })
+      mutate(sessionId, local)
         .catch(() => {
-          setLocal(confirmed.current); // rollback to last confirmed
+          setLocal(value); // rollback to prop (now refreshed by ticket_updated)
           show(t('headcount.updateFailed'), 'error');
         })
         .finally(() => setSaving(false));

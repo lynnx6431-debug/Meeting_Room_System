@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../context/LanguageContext';
 import type { OperatorCategory } from '../../hooks/useOperatorCategories';
 import type { OperatorOrder } from '../../hooks/useOperatorOrders';
+import { useOrderTransition } from '../../hooks/useOrderTransition';
 import { derivedStatus } from '../../lib/orderStatus';
 import { cn } from '../../lib/utils';
+import { useToast } from '../Toast';
 import { ElapsedTime } from './ElapsedTime';
 import { HeadcountStepper } from './HeadcountStepper';
 import { ItemChip } from './ItemChip';
@@ -16,22 +19,36 @@ function roomName(
   return map[lang] || room.nameEn || room.name || room.code || '—';
 }
 
-// E4-06: pure UI. Action clicks are console.log placeholders; E4-07 wires
-// the real PATCH acknowledge/complete. OVERDUE colour/flash is E4-08 — we
-// only expose data-status + pass `overdue` so that work has a seam.
+// E4-07: real ack/complete. We deliberately don't update local state on
+// success — the server emits ticket_updated, which flows through the
+// reducer and refreshes the order list. Same code path drives the
+// operator's own click and a peer counter's click.
 function ActionButton({ order }: { order: OperatorOrder }) {
   const { t } = useTranslation();
-  const onClick = () => {
-    // eslint-disable-next-line no-console
-    console.log('[E4-06 placeholder] action on order', order.id, 'status', order.status);
+  const { show } = useToast();
+  const { acknowledge, complete } = useOrderTransition();
+  const [pending, setPending] = useState(false);
+
+  const run = async (kind: 'ack' | 'complete') => {
+    setPending(true);
+    try {
+      if (kind === 'ack') await acknowledge(order.id);
+      else await complete(order.id);
+      // Don't touch local state — wait for the Socket.IO push to update.
+    } catch (_err) {
+      show(t(kind === 'ack' ? 'counter.ackFailed' : 'counter.completeFailed'), 'error');
+    } finally {
+      setPending(false);
+    }
   };
 
   if (order.status === 'pending') {
     return (
       <button
         type="button"
-        onClick={onClick}
-        className="rounded-md bg-accent px-6 py-3 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-opacity hover:opacity-95"
+        onClick={() => run('ack')}
+        disabled={pending}
+        className="rounded-md bg-accent px-6 py-3 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-opacity hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
       >
         {t('order.acknowledge')}
       </button>
@@ -41,8 +58,9 @@ function ActionButton({ order }: { order: OperatorOrder }) {
     return (
       <button
         type="button"
-        onClick={onClick}
-        className="rounded-md bg-success px-6 py-3 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-opacity hover:opacity-95"
+        onClick={() => run('complete')}
+        disabled={pending}
+        className="rounded-md bg-success px-6 py-3 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-opacity hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
       >
         {t('order.markComplete')}
       </button>

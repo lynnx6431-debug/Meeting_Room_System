@@ -57,6 +57,12 @@
     "label": "Party",
     "updateFailed": "Couldn't update headcount. Reverted."
   },
+  "counter": {
+    "ackFailed": "Failed to acknowledge ticket. Please retry.",
+    "completeFailed": "Failed to complete ticket. Please retry.",
+    "socketDisconnected": "Live connection lost.",
+    "socketReconnecting": "Reconnecting..."
+  },
   "role": {
     "SUPER_ADMIN": "Super admin",
     "CUSTOMER_ADMIN": "Customer admin",

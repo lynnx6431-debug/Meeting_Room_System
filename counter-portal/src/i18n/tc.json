@@ -57,6 +57,12 @@
     "label": "人數",
     "updateFailed": "無法更新人數,已還原。"
   },
+  "counter": {
+    "ackFailed": "確認訂單失敗,請重試。",
+    "completeFailed": "標記完成失敗,請重試。",
+    "socketDisconnected": "即時連線已中斷。",
+    "socketReconnecting": "重新連線中..."
+  },
   "role": {
     "SUPER_ADMIN": "超級管理員",
     "CUSTOMER_ADMIN": "客戶管理員",
