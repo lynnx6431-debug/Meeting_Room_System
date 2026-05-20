@@ -286,9 +286,21 @@ router.post(
         });
       });
 
-      const io = req.app.get('socketio');
-      if (io) {
-        io.emit('new_ticket', order);
+      // E4-07: tenant-scoped fanout with the operator-shaped payload so
+      // counter portal cards can render a fresh ticket without an extra
+      // round-trip. Wrapped in try/catch so a broadcast failure never
+      // breaks the guest's submit response.
+      try {
+        const io = req.app.get('socketio');
+        if (io) {
+          const { enrichOrderForOperator } = require('../services/orderEnrichment');
+          const enriched = await enrichOrderForOperator(order.id, { prisma });
+          if (enriched) {
+            io.to(`tenant:${enriched.tenantId}`).emit('new_ticket', enriched);
+          }
+        }
+      } catch (emitErr) {
+        console.error('[guest order create] new_ticket emit failed:', emitErr);
       }
 
       return res.status(201).json(order);

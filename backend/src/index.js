@@ -90,8 +90,31 @@ app.use('/api/rooms', roomsRouter);
 app.use('/api/service-counters', serviceCountersRouter);
 app.use('/api/categories', categoriesRouter);
 
-io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
+// Cross-tenant isolation (E4-07): every authenticated client joins a
+// `tenant:<tenantId>` room on connect, and ALL ticket emits are scoped to
+// that room. This keeps an operator from receiving wire-level events that
+// belong to other tenants, even before the client gets to filter.
+// SUPER_ADMIN users (no tenantId) join `super-admin` for future use.
+io.on('connection', async (socket) => {
+  const admin = socket.data && socket.data.admin;
+  let joinedRoom = null;
+  if (admin && admin.id) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: admin.id },
+        select: { tenantId: true },
+      });
+      if (user) {
+        joinedRoom = admin.role === 'SUPER_ADMIN' ? 'super-admin' : `tenant:${user.tenantId}`;
+        socket.join(joinedRoom);
+      }
+    } catch (err) {
+      console.error('[socket] tenant join lookup failed:', err);
+    }
+  }
+  console.log(
+    `Client connected: ${socket.id}${joinedRoom ? ` (joined ${joinedRoom}, user=${admin.id})` : ''}`,
+  );
 
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);

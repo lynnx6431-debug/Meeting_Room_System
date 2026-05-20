@@ -528,9 +528,41 @@ async function ensureDemoSessionFixtures() {
   };
 }
 
+/**
+ * E4-07: second tenant for the cross-tenant Socket.IO isolation proof.
+ * Intentionally minimal — just a tenant + an OPERATOR user with no rooms
+ * or categories. The user logs in, the socket joins tenant:<other>, and
+ * #32 verifies that nothing on tenant 1's wire reaches this socket.
+ */
+async function ensureSecondTenantFixture() {
+  const tenant2 = await findOrCreateTenantByName('Demo Bank Two', DEMO_LICENSE_EXPIRY);
+  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
+  const operator = await prisma.user.upsert({
+    where: { username: 'operator-bank2' },
+    update: {
+      passwordHash,
+      role: 'OPERATOR',
+      status: 'active',
+      tenantId: tenant2.id,
+    },
+    create: {
+      username: 'operator-bank2',
+      passwordHash,
+      role: 'OPERATOR',
+      status: 'active',
+      tenantId: tenant2.id,
+    },
+  });
+  console.log(
+    `  Cross-tenant fixture: tenant=${tenant2.name} (${tenant2.id}), user=${operator.username}`,
+  );
+  return { tenant2, operator };
+}
+
 async function main() {
   await ensureSystemApiKey();
   await ensureDemoSessionFixtures();
+  await ensureSecondTenantFixture();
 }
 
 main()

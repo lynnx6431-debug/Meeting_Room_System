@@ -150,8 +150,21 @@ async function createOrder(req, res, next) {
       });
     });
 
-    const io = req.app.get('socketio');
-    if (io) io.emit('new_ticket', order);
+    // E4-07: tenant-scoped fanout with operator-shaped payload (same
+    // path as the guest endpoint; this controller is deprecated but kept
+    // consistent so any straggler caller doesn't leak across tenants).
+    try {
+      const io = req.app.get('socketio');
+      if (io) {
+        const { enrichOrderForOperator } = require('../services/orderEnrichment');
+        const enriched = await enrichOrderForOperator(order.id, { prisma });
+        if (enriched) {
+          io.to(`tenant:${enriched.tenantId}`).emit('new_ticket', enriched);
+        }
+      }
+    } catch (emitErr) {
+      console.error('[orderController compat] new_ticket emit failed:', emitErr);
+    }
 
     return res.status(201).json(order);
   } catch (e) {
