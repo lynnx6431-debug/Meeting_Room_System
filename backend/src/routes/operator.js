@@ -161,7 +161,7 @@ router.get('/orders', async (req, res, next) => {
         room: {
           select: { id: true, code: true, name: true, nameEn: true, nameTc: true, nameSc: true },
         },
-        session: { select: { headcount: true } },
+        session: { select: { id: true, headcount: true } },
       },
       orderBy: { createdAt: 'desc' },
       take: limit,
@@ -206,6 +206,7 @@ router.get('/orders', async (req, res, next) => {
           createdAt: o.createdAt,
           acknowledgedAt: o.acknowledgedAt,
           completedAt: o.completedAt,
+          sessionId: o.session ? o.session.id : null,
           headcount: o.session ? o.session.headcount : null,
           room: o.room,
           items,
@@ -220,6 +221,57 @@ router.get('/orders', async (req, res, next) => {
       );
 
     return res.json({ orders, total: orders.length, meta });
+  } catch (e) {
+    next(e);
+  }
+});
+
+/**
+ * PATCH /api/operator/sessions/:sessionId/headcount
+ *
+ * Operator headcount override (V4.4 §5.3). RBAC: the operator must be
+ * assigned to the session's room. Only an occupied session may be changed.
+ * Body: { headcount: number }  (1..50)
+ */
+router.patch('/sessions/:sessionId/headcount', async (req, res, next) => {
+  try {
+    const { sessionId } = req.params;
+    const headcount = Number(req.body && req.body.headcount);
+
+    if (!Number.isInteger(headcount) || headcount < 1 || headcount > 50) {
+      return res.status(400).json({ error: 'INVALID_HEADCOUNT' });
+    }
+
+    const session = await prisma.roomSession.findUnique({
+      where: { id: sessionId },
+      select: { id: true, roomId: true, status: true, tenantId: true },
+    });
+    if (!session) {
+      return res.status(404).json({ error: 'SESSION_NOT_FOUND' });
+    }
+    if (session.status !== 'occupied') {
+      return res.status(400).json({ error: 'SESSION_NOT_ACTIVE' });
+    }
+
+    // RBAC: operator must be assigned to this session's room (SUPER_ADMIN
+    // bypasses the assignment check but is still tenant-scoped).
+    if (req.admin.role !== 'SUPER_ADMIN') {
+      const assignment = await prisma.roomOperatorAssignment.findFirst({
+        where: { roomId: session.roomId, operatorUserId: req.admin.id },
+        select: { id: true },
+      });
+      if (!assignment) {
+        return res.status(403).json({ error: 'NOT_ASSIGNED' });
+      }
+    }
+
+    const updated = await prisma.roomSession.update({
+      where: { id: sessionId },
+      data: { headcount },
+      select: { id: true, headcount: true },
+    });
+
+    return res.json({ session: updated });
   } catch (e) {
     next(e);
   }
