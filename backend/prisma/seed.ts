@@ -433,11 +433,43 @@ async function ensureDemoSessionFixtures() {
     data: { defaultOperatorId: operatorTidy.id },
   });
 
-  // ── E4-05: deterministic demo orders for the counter portal ──────────────
-  // Recreated every seed run so RBAC / KPI screenshots are stable. This also
-  // clears prior throwaway test orders for this demo tenant. Order.items is a
-  // JSON blob shaped exactly like the guest submit path: {itemId,qty,name}.
+  // ── E4-05/E4-06: deterministic demo orders for the counter portal ────────
+  // Recreated every seed run so RBAC / KPI / card screenshots are stable.
+  // Clears prior throwaway test orders for this demo tenant.
+  //
+  // E4-06: each demo order is bound to an OCCUPIED RoomSession so the order
+  // card's headcount stepper has a real sessionId + headcount to act on.
+  // Order.items is a JSON blob shaped exactly like the guest submit path
+  // {itemId,qty,name}. Status mix covers pending / overdue(aged) /
+  // acknowledged / done so all four card visuals are exercisable.
   await prisma.order.deleteMany({ where: { tenantId: tenant.id } });
+
+  // One occupied session per demo room. Free the partial-unique
+  // `one_active_per_room` index first by vacating any current occupied
+  // session, then create a fresh occupied one with a known headcount.
+  const demoRoomHeadcount: Array<[{ id: string }, number]> = [
+    [room, 4],
+    [roomLibrary, 2],
+    [roomTasting, 6],
+  ];
+  const sessionByRoom = new Map<string, string>();
+  for (const [r, headcount] of demoRoomHeadcount) {
+    await prisma.roomSession.updateMany({
+      where: { roomId: r.id, status: 'occupied' },
+      data: { status: 'vacant', closedAt: new Date() },
+    });
+    const s = await prisma.roomSession.create({
+      data: {
+        tenantId: tenant.id,
+        siteId: site.id,
+        roomId: r.id,
+        headcount,
+        status: 'occupied',
+      },
+      select: { id: true },
+    });
+    sessionByRoom.set(r.id, s.id);
+  }
 
   const itemRows = await prisma.menuItem.findMany({
     where: { siteId: site.id },
@@ -448,17 +480,17 @@ async function ensureDemoSessionFixtures() {
   const minsAgo = (m) => new Date(Date.now() - m * 60_000);
 
   const demoOrders = [
-    // overdue (>60s & pending) — bev (Drinks)
+    // overdue (pending & >60s) — bev (Drinks)
     { roomId: room.id, items: [li('drink-coffee', 2)], status: 'pending', createdAt: minsAgo(6) },
-    // bev (Snacks), acknowledged
+    // acknowledged — bev (Snacks)
     { roomId: room.id, items: [li('snack-chips', 1)], status: 'acknowledged', createdAt: minsAgo(4) },
-    // cross-category: bev sees (tea=Drinks), tidy sees (tidy-basic)
-    { roomId: room.id, items: [li('drink-tea', 1), li('tidy-basic', 1)], status: 'pending', createdAt: minsAgo(0.5) },
-    // bev (Drinks), done
+    // FRESH pending (cross-category): bev sees (tea=Drinks), tidy sees (tidy-basic)
+    { roomId: room.id, items: [li('drink-tea', 1), li('tidy-basic', 1)], status: 'pending', createdAt: minsAgo(0.05) },
+    // done — bev (Drinks)
     { roomId: roomLibrary.id, items: [li('drink-coffee', 1)], status: 'done', createdAt: minsAgo(20) },
-    // bev (Snacks), fresh pending
-    { roomId: roomTasting.id, items: [li('snack-nuts', 2)], status: 'pending', createdAt: minsAgo(0.2) },
-    // pure Tidy — bev NOT visible, operator-tidy visible (reverse RBAC proof)
+    // FRESH pending — bev (Snacks)
+    { roomId: roomTasting.id, items: [li('snack-nuts', 2)], status: 'pending', createdAt: minsAgo(0.03) },
+    // pure Tidy, overdue — bev NOT visible, operator-tidy visible (reverse RBAC)
     { roomId: room.id, items: [li('tidy-deep', 1)], status: 'pending', createdAt: minsAgo(3) },
   ];
 
@@ -469,6 +501,7 @@ async function ensureDemoSessionFixtures() {
         tenantId: tenant.id,
         siteId: site.id,
         roomId: o.roomId,
+        sessionId: sessionByRoom.get(o.roomId),
         items: o.items,
         status: o.status,
         createdAt: o.createdAt,
