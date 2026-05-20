@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CategoryTabBar } from '../components/CategoryTabBar';
 import { DashboardHeader } from '../components/DashboardHeader';
+import { OrderQueue } from '../components/OrderQueue';
 import { ShiftSidebar } from '../components/ShiftSidebar';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { OrderQueue } from '../components/OrderQueue';
 import { useOperatorCategories } from '../hooks/useOperatorCategories';
-import { useOperatorOrders } from '../hooks/useOperatorOrders';
+import { useOperatorOrders, type OperatorOrder } from '../hooks/useOperatorOrders';
+import { useOperatorSocket } from '../hooks/useOperatorSocket';
 import { pickByLang } from '../lib/pickByLang';
 
 function useClock() {
@@ -25,11 +26,29 @@ export function DashboardPage() {
   const { user } = useAuth();
   const clock = useClock();
 
-  // Lifted here so the queue (E4-06) can share the same active-tab filter.
+  // Lifted so the queue + Socket.IO push handler all share the same filter.
   const [activeTabId, setActiveTabId] = useState<string>('all');
   const { categories, defaultCategoryId, loading } = useOperatorCategories();
-  const { orders, loading: ordersLoading } = useOperatorOrders({
+  const {
+    orders,
+    meta,
+    loading: ordersLoading,
+    dispatch,
+  } = useOperatorOrders({
     categoryId: activeTabId === 'all' ? undefined : activeTabId,
+  });
+
+  // Mutable ref so the socket handler can read the latest list without
+  // resubscribing on every render.
+  const ordersRef = useRef<OperatorOrder[]>(orders);
+  ordersRef.current = orders;
+
+  // Live updates. Returns connection state for the header's Live socket dot.
+  const { connected: socketConnected } = useOperatorSocket({
+    meta,
+    activeTabId,
+    ordersRef,
+    dispatch,
   });
 
   const categoryMap = useMemo(
@@ -54,10 +73,14 @@ export function DashboardPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <DashboardHeader />
+      <DashboardHeader socketConnected={socketConnected} />
 
       <div className="flex flex-1 overflow-hidden">
-        <ShiftSidebar />
+        <ShiftSidebar
+          categories={categories}
+          defaultCategoryId={defaultCategoryId}
+          categoriesLoading={loading}
+        />
 
         <div className="flex flex-1 flex-col overflow-hidden">
           <CategoryTabBar
