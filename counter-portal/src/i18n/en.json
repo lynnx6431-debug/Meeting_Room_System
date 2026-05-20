@@ -46,6 +46,17 @@
     "empty": "No tickets in this view.",
     "placeholder": "Queue placeholder — E4-06 will render order cards here."
   },
+  "order": {
+    "acknowledge": "Acknowledge",
+    "markComplete": "Mark complete",
+    "elapsed": "Elapsed",
+    "elapsedSeconds": "{{count}}s",
+    "elapsedMinutes": "{{m}}m {{s}}s"
+  },
+  "headcount": {
+    "label": "Party",
+    "updateFailed": "Couldn't update headcount. Reverted."
+  },
   "role": {
     "SUPER_ADMIN": "Super admin",
     "CUSTOMER_ADMIN": "Customer admin",

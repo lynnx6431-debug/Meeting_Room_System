@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { ToastProvider } from './components/Toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { DashboardPage } from './pages/DashboardPage';
@@ -20,6 +21,7 @@ export default function App() {
     <ErrorBoundary>
       <LanguageProvider>
         <AuthProvider>
+          <ToastProvider>
           <BrowserRouter
             future={{
               v7_startTransition: true,
@@ -40,6 +42,7 @@ export default function App() {
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </BrowserRouter>
+          </ToastProvider>
         </AuthProvider>
       </LanguageProvider>
     </ErrorBoundary>

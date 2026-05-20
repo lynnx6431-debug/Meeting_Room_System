@@ -19,6 +19,7 @@ export type OperatorOrder = {
   createdAt: string;
   acknowledgedAt: string | null;
   completedAt: string | null;
+  sessionId: string | null;
   headcount: number | null;
   room: {
     id: string;

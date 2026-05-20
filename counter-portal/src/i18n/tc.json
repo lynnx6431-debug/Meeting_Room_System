@@ -46,6 +46,17 @@
     "empty": "此檢視沒有訂單。",
     "placeholder": "訂單佇列預留 — E4-06 會在此顯示訂單卡片。"
   },
+  "order": {
+    "acknowledge": "確認",
+    "markComplete": "標記完成",
+    "elapsed": "已過",
+    "elapsedSeconds": "{{count}} 秒",
+    "elapsedMinutes": "{{m}} 分 {{s}} 秒"
+  },
+  "headcount": {
+    "label": "人數",
+    "updateFailed": "無法更新人數,已還原。"
+  },
   "role": {
     "SUPER_ADMIN": "超級管理員",
     "CUSTOMER_ADMIN": "客戶管理員",

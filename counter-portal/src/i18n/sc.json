@@ -46,6 +46,17 @@
     "empty": "此视图没有订单。",
     "placeholder": "订单队列占位 — E4-06 会在此显示订单卡片。"
   },
+  "order": {
+    "acknowledge": "确认",
+    "markComplete": "标记完成",
+    "elapsed": "已过",
+    "elapsedSeconds": "{{count}} 秒",
+    "elapsedMinutes": "{{m}} 分 {{s}} 秒"
+  },
+  "headcount": {
+    "label": "人数",
+    "updateFailed": "无法更新人数,已还原。"
+  },
   "role": {
     "SUPER_ADMIN": "超级管理员",
     "CUSTOMER_ADMIN": "客户管理员",
