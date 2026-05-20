@@ -1,8 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import { cn } from '../lib/utils';
 import { LanguageToggle } from './LanguageToggle';
 
-export function DashboardHeader() {
+// `socketConnected` reflects the Socket.IO connection state. Green pulsing
+// dot when live; red + "Reconnecting…" while disconnected.
+export function DashboardHeader({ socketConnected = false }: { socketConnected?: boolean }) {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
 
@@ -35,12 +38,34 @@ export function DashboardHeader() {
       <div className="flex items-center gap-5">
         <LanguageToggle />
 
-        <div className="flex items-center gap-2 rounded-full border border-border bg-background-elevated px-3 py-1.5">
+        <div
+          className={cn(
+            'flex items-center gap-2 rounded-full border px-3 py-1.5',
+            socketConnected
+              ? 'border-border bg-background-elevated'
+              : 'border-warning/30 bg-warning/10',
+          )}
+          aria-live="polite"
+        >
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+            <span
+              className={cn(
+                'absolute inline-flex h-full w-full rounded-full opacity-60',
+                socketConnected ? 'animate-ping bg-success' : 'bg-warning',
+              )}
+            />
+            <span
+              className={cn(
+                'relative inline-flex h-2 w-2 rounded-full',
+                socketConnected ? 'bg-success' : 'bg-warning',
+              )}
+            />
           </span>
-          <span className="text-xs text-foreground-muted">{t('header.liveSocket')}</span>
+          <span
+            className={cn('text-xs', socketConnected ? 'text-foreground-muted' : 'text-warning')}
+          >
+            {socketConnected ? t('header.liveSocket') : t('counter.socketReconnecting')}
+          </span>
         </div>
 
         <button

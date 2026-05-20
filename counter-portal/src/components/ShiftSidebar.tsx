@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
+import type { OperatorCategory } from '../hooks/useOperatorCategories';
 import { useOperatorStats, type OperatorStats } from '../hooks/useOperatorStats';
 import { cn } from '../lib/utils';
 import { pickByLang } from '../lib/pickByLang';
@@ -11,10 +12,33 @@ const KPI_ITEMS: { key: keyof OperatorStats; isWarning?: boolean }[] = [
   { key: 'done' },
 ];
 
-export function ShiftSidebar() {
+// E4-07: the sidebar's "YOUR DEFAULT TAB" label now reflects the operator's
+// real default category (resolved server-side via MenuCategory.defaultOperatorId
+// and surfaced by useOperatorCategories.defaultCategoryId). The E4-03 mock
+// in useOperatorStats is no longer consumed here.
+type Props = {
+  categories: OperatorCategory[];
+  defaultCategoryId: string | null;
+  categoriesLoading: boolean;
+};
+
+export function ShiftSidebar({ categories, defaultCategoryId, categoriesLoading }: Props) {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { stats, defaultTab } = useOperatorStats();
+  const { stats } = useOperatorStats();
+
+  const defaultCategory = defaultCategoryId
+    ? categories.find((c) => c.id === defaultCategoryId)
+    : null;
+  const defaultTabLabel = defaultCategory
+    ? pickByLang(
+        { en: defaultCategory.nameEn, tc: defaultCategory.nameTc, sc: defaultCategory.nameSc },
+        language,
+        defaultCategory.nameEn,
+      )
+    : categoriesLoading
+      ? t('queue.loadingCount')
+      : '—';
 
   return (
     <aside className="flex w-64 flex-col border-r border-border bg-background">
@@ -62,15 +86,7 @@ export function ShiftSidebar() {
         <div className="mb-2 text-[10px] uppercase tracking-widest text-foreground-subtle">
           {t('sidebar.yourDefaultTab')}
         </div>
-        <div className="font-medium text-foreground">
-          {defaultTab
-            ? pickByLang(
-                { en: defaultTab.nameEn, tc: defaultTab.nameTc, sc: defaultTab.nameSc },
-                language,
-                defaultTab.nameEn,
-              )
-            : '—'}
-        </div>
+        <div className="font-medium text-foreground">{defaultTabLabel}</div>
         <p className="mt-2 text-xs leading-relaxed text-foreground-subtle">
           {t('sidebar.defaultTabHint')}
         </p>
