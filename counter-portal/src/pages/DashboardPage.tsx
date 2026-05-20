@@ -5,9 +5,9 @@ import { DashboardHeader } from '../components/DashboardHeader';
 import { ShiftSidebar } from '../components/ShiftSidebar';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { OrderQueue } from '../components/OrderQueue';
 import { useOperatorCategories } from '../hooks/useOperatorCategories';
 import { useOperatorOrders } from '../hooks/useOperatorOrders';
-import { derivedStatus } from '../lib/orderStatus';
 import { pickByLang } from '../lib/pickByLang';
 
 function useClock() {
@@ -31,6 +31,11 @@ export function DashboardPage() {
   const { orders, loading: ordersLoading } = useOperatorOrders({
     categoryId: activeTabId === 'all' ? undefined : activeTabId,
   });
+
+  const categoryMap = useMemo(
+    () => new Map(categories.map((c) => [c.id, c])),
+    [categories],
+  );
 
   const activeTitle = useMemo(() => {
     if (activeTabId === 'all') {
@@ -79,30 +84,7 @@ export function DashboardPage() {
               <div className="text-sm tabular-nums text-foreground-muted">{clock}</div>
             </div>
 
-            {/* TODO E4-06: replace this raw dump with order cards. This proves
-                the RBAC-filtered data flow (room + Option C category) works. */}
-            {ordersLoading ? (
-              <div className="py-20 text-center text-sm text-foreground-subtle">
-                {t('queue.loadingCount')}
-              </div>
-            ) : orders.length === 0 ? (
-              <div className="py-20 text-center text-sm text-foreground-subtle">
-                {t('queue.empty')}
-              </div>
-            ) : (
-              <pre className="overflow-x-auto rounded-lg border border-border bg-background-elevated p-4 text-xs text-foreground-muted">
-                {JSON.stringify(
-                  orders.map((o) => ({
-                    id: o.id.slice(0, 8),
-                    status: derivedStatus(o),
-                    room: o.room.code || o.room.name,
-                    items: o.items.map((it) => `${it.name}×${it.qty}`),
-                  })),
-                  null,
-                  2,
-                )}
-              </pre>
-            )}
+            <OrderQueue orders={orders} categoryMap={categoryMap} loading={ordersLoading} />
           </main>
         </div>
       </div>
